@@ -69,6 +69,12 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: 22
           script: |
+            # 환경 변수 로드 (NVM, NPM, PM2 경로 확보)
+            [ -s "$HOME/.profile" ] && source "$HOME/.profile"
+            [ -s "$HOME/.bashrc" ] && source "$HOME/.bashrc"
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
             cd /var/www/cressets
 
             # 압축 해제 및 파일 삭제
