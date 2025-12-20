@@ -33,9 +33,9 @@ jobs:
       - name: Debug build folders
         run: ls -la
 
-      # 5. 빌드 산출물 압축 (SCP 전송 오류 방지)
+      # 5. 빌드 산출물 압축 (실행에 필요한 모든 파일 포함)
       - name: Archive build artifacts
-        run: tar -czf artifact.tar.gz .next public
+        run: tar -czf artifact.tar.gz .next public package.json package-lock.json next.config.ts
 
       # 6. 서버에서 이전 빌드 삭제 (용량 절약)
       - name: Clean previous build on server
