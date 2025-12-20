@@ -33,7 +33,11 @@ jobs:
       - name: Debug build folders
         run: ls -la
 
-      # 5. 서버에서 이전 빌드 삭제 (용량 절약)
+      # 5. 빌드 산출물 압축 (SCP 전송 오류 방지)
+      - name: Archive build artifacts
+        run: tar -czf artifact.tar.gz .next public
+
+      # 6. 서버에서 이전 빌드 삭제 (용량 절약)
       - name: Clean previous build on server
         uses: appleboy/ssh-action@v1
         with:
@@ -45,7 +49,7 @@ jobs:
             cd /var/www/cressets
             rm -rf .next public
 
-      # 6. SCP로 빌드 산출물 전송 (명확한 경로 지정)
+      # 7. SCP로 압축 파일 전송
       - name: Upload build artifacts
         uses: appleboy/scp-action@v1
         with:
@@ -53,14 +57,11 @@ jobs:
           username: ubuntu
           key: ${{ secrets.SSH_KEY }}
           port: 22
-          source: |
-            .next
-            public
+          source: artifact.tar.gz
           target: /var/www/cressets
-          strip_components: 1
 
-      # 7. 서버에서 의존성 설치 + PM2 재시작
-      - name: Install deps & restart PM2
+      # 8. 서버에서 압축 해제 및 의존성 설치, PM2 재시작
+      - name: Extract artifacts, install deps & restart PM2
         uses: appleboy/ssh-action@v1
         with:
           host: cressets.mooo.com
@@ -69,6 +70,10 @@ jobs:
           port: 22
           script: |
             cd /var/www/cressets
+
+            # 압축 해제 및 파일 삭제
+            tar -xzf artifact.tar.gz
+            rm artifact.tar.gz
 
             # 프로덕션 의존성만 설치
             npm ci --production
