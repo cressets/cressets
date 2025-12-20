@@ -47,7 +47,7 @@ jobs:
 
       # 6. 서버에서 기존 파일 삭제, 의존성 설치 및 PM2 재시작
       - name: Install deps & restart PM2
-        uses: appleboy/ssh-action@v1.1.5
+        uses: appleboy/ssh-action@v1
         with:
           host: cressets.mooo.com
           username: ubuntu
