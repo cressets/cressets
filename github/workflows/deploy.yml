@@ -1,0 +1,72 @@
+name: Deploy Cressets (Lightweight)
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      APP_NAME: cressets
+      APP_DIR: /var/www/cressets
+      PORT: 3000
+
+    steps:
+      # 1. Checkout
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 2. Node.js 설정 (빌드용)
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.17.1
+          cache: npm
+
+      # 3. 의존성 설치 (빌드용)
+      - name: Install dependencies
+        run: npm ci
+
+      # 4. Build
+      - name: Build
+        run: npm run build
+
+      # 5. 빌드 산출물만 서버로 전송
+      - name: Deploy build artifacts
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: cressets.mooo.com
+          username: ubuntu
+          key: ${{ secrets.SSH_KEY }}
+          port: 22
+          source: |
+            .next
+            public
+            package.json
+            package-lock.json
+            next.config.js
+          target: /var/www/cressets
+
+      # 6. 서버에서 의존성 설치 + PM2 재시작
+      - name: Install deps & restart PM2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: cressets.mooo.com
+          username: ubuntu
+          key: ${{ secrets.SSH_KEY }}
+          port: 22
+          script: |
+            cd $APP_DIR
+
+            npm ci --production
+
+            pm2 delete $APP_NAME || true
+
+            pm2 start npm \
+              --name "$APP_NAME" \
+              -- start -- -p $PORT
+
+            pm2 save
