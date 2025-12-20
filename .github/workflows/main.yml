@@ -1,20 +1,20 @@
-name: Deploy Cressets (Lightweight)
+name: Deploy Cressets (Final Working)
 
 on:
   push:
     branches:
-      - master  # 실제 기본 브랜치 확인 (main이라면 main으로 수정)
+      - master  # 기본 브랜치가 main이면 main으로 변경
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout
+      # 1. 코드 체크아웃
       - name: Checkout
         uses: actions/checkout@v4
 
-      # 2. Node.js 설정
+      # 2. Node.js 설치
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -25,13 +25,29 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # 4. Build
+      # 4. 빌드
       - name: Build
         run: npm run build
 
-      # 5. 서버로 빌드 산출물 전송
-      - name: Deploy build artifacts
-        uses: appleboy/scp-action@v0.1.7
+      # 4.1. 빌드 폴더 확인 (디버깅용)
+      - name: Debug build folders
+        run: ls -la
+
+      # 5. 서버에서 이전 빌드 삭제 (용량 절약)
+      - name: Clean previous build on server
+        uses: appleboy/ssh-action@v1
+        with:
+          host: cressets.mooo.com
+          username: ubuntu
+          key: ${{ secrets.SSH_KEY }}
+          port: 22
+          script: |
+            cd /var/www/cressets
+            rm -rf .next public
+
+      # 6. SCP로 빌드 산출물 전송 (명확한 경로 지정)
+      - name: Upload build artifacts
+        uses: appleboy/scp-action@v1
         with:
           host: cressets.mooo.com
           username: ubuntu
@@ -40,12 +56,10 @@ jobs:
           source: |
             .next
             public
-            package.json
-            package-lock.json
-            next.config.js
           target: /var/www/cressets
+          strip_components: 1
 
-      # 6. 서버에서 기존 파일 삭제, 의존성 설치 및 PM2 재시작
+      # 7. 서버에서 의존성 설치 + PM2 재시작
       - name: Install deps & restart PM2
         uses: appleboy/ssh-action@v1
         with:
@@ -54,20 +68,12 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: 22
           script: |
-            # 배포 전 기존 파일 삭제
-            rm -rf /var/www/cressets/*
+            cd /var/www/cressets
 
-            # 환경 변수 설정
-            export APP_DIR=/var/www/cressets
-            export APP_NAME=cressets
-            export PORT=3000
-
-            cd $APP_DIR
-
-            # 프로덕션 의존성 설치
+            # 프로덕션 의존성만 설치
             npm ci --production
 
             # PM2 재시작 (앱이 없으면 start, 있으면 reload)
-            pm2 describe $APP_NAME || pm2 start npm --name "$APP_NAME" -- start -- -p $PORT
-            pm2 reload $APP_NAME
+            pm2 describe cressets || pm2 start npm --name "cressets" -- start -- -p 3000
+            pm2 reload cressets
             pm2 save
