@@ -20,12 +20,12 @@ pipeline {
         }
 
         stage('Checkout') {
-    steps {
-        git branch: 'master',
-            url: 'https://github.com/cressets/cressets.git',
-            credentialsId: 'GITHUB'
-    }
-}
+            steps {
+                git branch: 'master',
+                    url: 'https://github.com/cressets/cressets.git',
+                    credentialsId: 'GITHUB'
+            }
+        }
 
         stage('Install Dependencies') {
             steps {
