@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -8,13 +9,13 @@ export default function Home() {
         <div className="text-2xl font-bold tracking-tighter">Cressets</div>
         <div className="hidden md:flex gap-8 text-sm font-medium text-neutral-600">
           <a href="#" className="hover:text-black transition-colors">Features</a>
-          <a href="#" className="hover:text-black transition-colors">Market Data</a>
+          <Link href="/stocks" className="hover:text-black transition-colors">Market Data</Link>
           <a href="#" className="hover:text-black transition-colors">Insights</a>
           <a href="#" className="hover:text-black transition-colors">Contact</a>
         </div>
-        <button className="bg-neutral-900 text-white px-6 py-2.5 rounded-full text-sm font-medium hover:bg-neutral-800 transition-all">
-          Learn More ↗
-        </button>
+        <Link href="/stocks" className="bg-neutral-900 text-white px-6 py-2.5 rounded-full text-sm font-medium hover:bg-neutral-800 transition-all">
+          Get Started ↗
+        </Link>
       </nav>
 
       <main className="pt-32 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
