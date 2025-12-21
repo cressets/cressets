@@ -41,9 +41,9 @@ export default function Home() {
             priority
           />
           {/* Floating Stats Badge */}
-          <div className="absolute bottom-8 left-8 md:bottom-12 md:left-12 z-20 bg-white/10 backdrop-blur-lg border border-white/20 p-6 rounded-2xl text-white">
-            <div className="text-3xl font-medium mb-1">+24.5%</div>
-            <div className="text-sm text-white/80 uppercase tracking-widest font-medium">Portfolio Growth</div>
+          <div className="absolute bottom-8 left-8 md:bottom-12 md:left-12 z-20 bg-neutral-900/90 backdrop-blur-xl border border-white/10 p-6 rounded-2xl text-white shadow-2xl">
+            <div className="text-3xl font-bold mb-1 text-emerald-400">+24.5%</div>
+            <div className="text-sm text-neutral-300 uppercase tracking-widest font-bold">Portfolio Growth</div>
           </div>
         </div>
 

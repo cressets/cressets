@@ -33,11 +33,16 @@ jobs:
       - name: Debug build folders
         run: ls -la
 
-      # 5. 빌드 산출물 압축 (실행에 필요한 모든 파일 포함)
+      # 5. 빌드 산출물 압축 (Standalone 모드 최적화)
+      # .next/standalone 폴더가 실행에 필요한 최소한의 node_modules를 포함함
       - name: Archive build artifacts
-        run: tar -czf artifact.tar.gz .next public package.json package-lock.json next.config.ts
+        run: |
+          cp -r .next/static .next/standalone/.next/static
+          cp -r public .next/standalone/public
+          cd .next/standalone
+          tar -czf ../../artifact.tar.gz .
 
-      # 6. 서버에서 이전 빌드 삭제 (용량 절약)
+      # 6. 서버에서 이전 파일 정리 (용량 절약)
       - name: Clean previous build on server
         uses: appleboy/ssh-action@v1
         with:
@@ -47,7 +52,7 @@ jobs:
           port: 22
           script: |
             cd /var/www/cressets
-            rm -rf .next public
+            rm -rf .next public server.js node_modules artifact.tar.gz
 
       # 7. SCP로 압축 파일 전송
       - name: Upload build artifacts
@@ -60,17 +65,17 @@ jobs:
           source: artifact.tar.gz
           target: /var/www/cressets
 
-      # 8. 서버에서 압축 해제 및 의존성 설치, PM2 재시작
-      - name: Extract artifacts, install deps & restart PM2
+      # 8. 서버에서 압축 해제 및 PM2 재시작 (의존성 설치 생략)
+      - name: Extract artifacts & restart PM2
         uses: appleboy/ssh-action@v1
         with:
           host: cressets.mooo.com
           username: ubuntu
           key: ${{ secrets.SSH_KEY }}
           port: 22
-          command_timeout: 30m
+          command_timeout: 10m
           script: |
-            # 환경 변수 로드 (NVM, NPM, PM2 경로 확보)
+            # 환경 변수 로드
             [ -s "$HOME/.profile" ] && source "$HOME/.profile"
             [ -s "$HOME/.bashrc" ] && source "$HOME/.bashrc"
             export NVM_DIR="$HOME/.nvm"
@@ -82,9 +87,7 @@ jobs:
             tar -xzf artifact.tar.gz
             rm artifact.tar.gz
 
-            # 프로덕션 의존성만 설치
-            npm ci --omit=dev
-
-            # PM2 재시작 (앱이 없으면 start, 있으면 reload)
-            pm2 describe cressets > /dev/null 2>&1 && pm2 reload cressets || pm2 start npm --name "cressets" -- start -- -p 3000
+            # PM2 재시작 (Standalone 서버 실행)
+            # PORT 환경변수를 지정하여 3000포트로 실행
+            pm2 describe cressets > /dev/null 2>&1 && pm2 reload cressets || PORT=3000 pm2 start server.js --name "cressets"
             pm2 save

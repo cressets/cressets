@@ -57,7 +57,7 @@ export default function StockDetailPage({ params }: PageProps) {
             {/* Detail Header */}
             <div className="bg-white border-b border-neutral-200">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                    <Link href="/stocks" className="inline-flex items-center gap-2 text-sm font-semibold text-neutral-500 hover:text-neutral-900 transition-colors mb-8 group">
+                    <Link href="/stocks" className="inline-flex items-center gap-2 text-sm font-semibold text-neutral-600 hover:text-neutral-900 transition-colors mb-8 group">
                         <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
                         목록으로 돌아가기
                     </Link>
@@ -66,13 +66,13 @@ export default function StockDetailPage({ params }: PageProps) {
                         <div>
                             <div className="flex items-center gap-3 mb-2">
                                 <span className="px-3 py-1 bg-neutral-100 rounded-full text-[10px] font-bold tracking-widest text-neutral-500 uppercase">{stock.market} MARKET</span>
-                                <span className="flex items-center gap-1 text-[10px] font-bold text-neutral-400">
+                                <span className="flex items-center gap-1 text-[10px] font-bold text-neutral-600">
                                     <Clock size={12} />
                                     REAL-TIME DATA
                                 </span>
                             </div>
-                            <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-1">{stock.name}</h1>
-                            <p className="text-xl font-mono text-neutral-400 font-medium">{stock.symbol}</p>
+                            <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-1 font-serif">{stock.name}</h1>
+                            <p className="text-xl font-mono text-neutral-600 font-medium">{stock.symbol}</p>
                         </div>
 
                         <div className="text-right">
@@ -96,14 +96,14 @@ export default function StockDetailPage({ params }: PageProps) {
                         <div className="bg-white p-8 rounded-[40px] border border-neutral-100 shadow-sm">
                             <div className="flex items-center justify-between mb-2">
                                 <h3 className="text-lg font-bold flex items-center gap-2">
-                                    <Info size={18} className="text-neutral-400" />
+                                    <Info size={18} className="text-neutral-600" />
                                     실시간 차트
                                 </h3>
                                 <div className="flex gap-2">
                                     <span className="px-3 py-1 bg-black text-white text-[10px] font-bold rounded-lg cursor-pointer">1D</span>
-                                    <span className="px-3 py-1 bg-neutral-100 text-neutral-400 text-[10px] font-bold rounded-lg cursor-pointer hover:bg-neutral-200">1W</span>
-                                    <span className="px-3 py-1 bg-neutral-100 text-neutral-400 text-[10px] font-bold rounded-lg cursor-pointer hover:bg-neutral-200">1M</span>
-                                    <span className="px-3 py-1 bg-neutral-100 text-neutral-400 text-[10px] font-bold rounded-lg cursor-pointer hover:bg-neutral-200">1Y</span>
+                                    <span className="px-3 py-1 bg-neutral-100 text-neutral-600 text-[10px] font-bold rounded-lg cursor-pointer hover:bg-neutral-200">1W</span>
+                                    <span className="px-3 py-1 bg-neutral-100 text-neutral-600 text-[10px] font-bold rounded-lg cursor-pointer hover:bg-neutral-200">1M</span>
+                                    <span className="px-3 py-1 bg-neutral-100 text-neutral-600 text-[10px] font-bold rounded-lg cursor-pointer hover:bg-neutral-200">1Y</span>
                                 </div>
                             </div>
                             <StockChart data={chartData} isPositive={isPositive} />

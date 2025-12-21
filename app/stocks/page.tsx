@@ -52,8 +52,8 @@ export default function StocksPage() {
                                 key={m}
                                 onClick={() => setMarketFilter(m)}
                                 className={`px-5 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${marketFilter === m
-                                        ? 'bg-neutral-900 text-white shadow-lg'
-                                        : 'bg-white border border-neutral-200 text-neutral-600 hover:border-neutral-900'
+                                    ? 'bg-neutral-900 text-white shadow-lg'
+                                    : 'bg-white border border-neutral-200 text-neutral-600 hover:border-neutral-900'
                                     }`}
                             >
                                 {m === 'ALL' ? '전체 시장' : m === 'US' ? '미국 주식' : m === 'KR' ? '한국 주식' : '일본 주식'}
@@ -74,9 +74,9 @@ export default function StocksPage() {
                             >
                                 <div className="flex justify-between items-start mb-4">
                                     <div>
-                                        <span className="text-xs font-bold text-neutral-400 uppercase tracking-widest">{stock.market} MARKET</span>
+                                        <span className="text-xs font-bold text-neutral-600 uppercase tracking-widest">{stock.market} MARKET</span>
                                         <h3 className="text-xl font-bold mt-1 group-hover:text-blue-600 transition-colors">{stock.name}</h3>
-                                        <p className="text-sm text-neutral-500 font-mono">{stock.symbol}</p>
+                                        <p className="text-sm text-neutral-600 font-mono font-bold">{stock.symbol}</p>
                                     </div>
                                     <div className={`p-2 rounded-xl ${stock.change >= 0 ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'}`}>
                                         {stock.change >= 0 ? <TrendingUp size={20} /> : <TrendingDown size={20} />}
@@ -93,7 +93,7 @@ export default function StocksPage() {
                                             {stock.change >= 0 ? '+' : ''}{stock.change.toLocaleString()} ({stock.changePercent}%)
                                         </div>
                                     </div>
-                                    <div className="text-xs font-medium text-neutral-400 group-hover:text-neutral-900 transition-colors">
+                                    <div className="text-xs font-bold text-neutral-600 group-hover:text-neutral-900 transition-colors">
                                         상세보기 →
                                     </div>
                                 </div>
