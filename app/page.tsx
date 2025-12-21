@@ -1,126 +1,152 @@
 import Image from "next/image";
 import Link from "next/link";
+import { TrendingUp, MessageSquare, Search, ArrowRight, ShieldCheck, Zap, Users } from 'lucide-react';
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-white text-black font-sans selection:bg-neutral-800 selection:text-white">
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 py-6 bg-white/80 backdrop-blur-md">
-        <div className="text-2xl font-bold tracking-tighter">Cressets</div>
-        <div className="hidden md:flex gap-8 text-sm font-medium text-neutral-600">
-          <a href="#" className="hover:text-black transition-colors">Features</a>
-          <Link href="/stocks" className="hover:text-black transition-colors">Market Data</Link>
-          <a href="#" className="hover:text-black transition-colors">Insights</a>
-          <a href="#" className="hover:text-black transition-colors">Contact</a>
-        </div>
-        <Link href="/stocks" className="bg-neutral-900 text-white px-6 py-2.5 rounded-full text-sm font-medium hover:bg-neutral-800 transition-all">
-          Get Started ↗
-        </Link>
-      </nav>
+    <div className="min-h-screen bg-white text-black font-sans selection:bg-neutral-800 selection:text-white overflow-x-hidden">
 
-      <main className="pt-32 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      <main className="pt-32 pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Hero Section */}
-        <div className="flex flex-col items-center text-center space-y-8 mb-20">
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-serif tracking-tight text-neutral-900 max-w-5xl leading-[1.1]">
-            Discover market insights and manage your assets with clarity and confidence.
+        <div className="relative flex flex-col items-center text-center space-y-10 mb-32">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-neutral-100 rounded-full blur-[120px] -z-10 opacity-60" />
+
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-neutral-50 border border-neutral-100 text-xs font-black tracking-widest text-neutral-500 uppercase animate-in fade-in slide-in-from-bottom-4 duration-1000">
+            <Zap size={14} className="text-neutral-900 fill-neutral-900" />
+            Financial Beacon
+          </div>
+
+          <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-neutral-900 max-w-5xl leading-[0.95] animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-100">
+            Illuminate Your <br />
+            <span className="text-neutral-400">Financial Future.</span>
           </h1>
-          <p className="text-lg md:text-xl text-neutral-500 max-w-2xl leading-relaxed">
-            Cressets is a financial platform that provides stock market search, data-driven insights, and personal asset management tools in one place.
+
+          <p className="text-xl md:text-2xl text-neutral-500 max-w-2xl leading-relaxed animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-200">
+            Cressets은 데이터 기반의 통찰력으로 복잡한 시장을 밝히는 등불입니다. 실시간 검색, 집단 지성, 그리고 AI 분석을 한 곳에서 경험하세요.
           </p>
-        </div>
 
-        {/* Dashboard Showcase */}
-        <div className="relative w-full rounded-3xl overflow-hidden shadow-2xl border border-neutral-100 bg-neutral-50 mb-20 group">
-          <div className="absolute inset-0 bg-gradient-to-t from-neutral-900/10 to-transparent pointer-events-none z-10" />
-          <Image
-            src="/dashboard.png"
-            alt="Cressets Dashboard"
-            width={1920}
-            height={1080}
-            className="w-full h-auto object-cover transform transition-transform duration-700 hover:scale-[1.01]"
-            priority
-          />
-          {/* Floating Stats Badge */}
-          <div className="absolute bottom-8 left-8 md:bottom-12 md:left-12 z-20 bg-neutral-900/90 backdrop-blur-xl border border-white/10 p-6 rounded-2xl text-white shadow-2xl">
-            <div className="text-3xl font-bold mb-1 text-emerald-400">+24.5%</div>
-            <div className="text-sm text-neutral-300 uppercase tracking-widest font-bold">Portfolio Growth</div>
+          <div className="flex flex-wrap justify-center gap-4 pt-4 animate-in fade-in slide-in-from-bottom-16 duration-1000 delay-300">
+            <Link
+              href="/stocks"
+              className="bg-neutral-900 text-white px-10 py-5 rounded-full font-black text-lg hover:bg-neutral-800 transition-all shadow-2xl hover:scale-105 active:scale-95 flex items-center gap-2"
+            >
+              시장 탐색하기 <Search size={20} />
+            </Link>
+            <Link
+              href="/boards"
+              className="bg-white text-neutral-900 border border-neutral-200 px-10 py-5 rounded-full font-black text-lg hover:bg-neutral-50 transition-all flex items-center gap-2"
+            >
+              토론 참여하기 <MessageSquare size={20} />
+            </Link>
           </div>
         </div>
 
-        {/* Features Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
-          {/* Feature 1 */}
-          <div className="bg-neutral-50 rounded-2xl p-8 hover:bg-neutral-100 transition-colors duration-300">
-            <div className="w-16 h-16 mb-6 relative">
-              <Image src="/feature-stocks.png" alt="Stock Search" fill className="object-contain" />
+        {/* Brand Core - Lantern Concept */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-32 items-center">
+          <div className="relative group">
+            <div className="absolute inset-0 bg-neutral-900 rounded-[60px] blur-3xl opacity-0 group-hover:opacity-10 transition-opacity duration-700" />
+            <div className="relative rounded-[50px] overflow-hidden border border-neutral-100 shadow-2xl bg-neutral-50 aspect-video flex items-center justify-center p-12">
+              <Image
+                src="/dashboard.png"
+                alt="Cressets Dashboard"
+                width={800}
+                height={500}
+                className="rounded-3xl shadow-2xl transform group-hover:scale-[1.02] transition-transform duration-700"
+              />
             </div>
-            <h3 className="text-2xl font-serif mb-3">Stock Market Search</h3>
-            <p className="text-neutral-500 leading-relaxed">
-              Real-time data and advanced filtering to find the perfect investment opportunities across global markets.
-            </p>
+            <div className="absolute -bottom-6 -right-6 bg-white p-8 rounded-3xl shadow-2xl border border-neutral-100 max-w-[240px]">
+              <div className="flex items-center gap-2 text-emerald-500 font-black mb-2">
+                <TrendingUp size={18} /> +32.8%
+              </div>
+              <p className="text-xs text-neutral-500 leading-tight">AI가 분석한 Cressets Growth Index 2025 전망</p>
+            </div>
           </div>
 
-          {/* Feature 2 */}
-          <div className="bg-neutral-50 rounded-2xl p-8 hover:bg-neutral-100 transition-colors duration-300">
-            <div className="w-16 h-16 mb-6 relative">
-              <Image src="/feature-insights.png" alt="Insights" fill className="object-contain" />
-            </div>
-            <h3 className="text-2xl font-serif mb-3">Data-Driven Insights</h3>
-            <p className="text-neutral-500 leading-relaxed">
-              AI-powered analysis and clear visualizations help you understand market trends and make informed decisions.
+          <div className="space-y-8 pl-0 lg:pl-12">
+            <h2 className="text-4xl md:text-5xl font-black tracking-tight leading-tight">
+              투명함이 만드는 <br />확신(Confidence).
+            </h2>
+            <p className="text-lg text-neutral-500 leading-relaxed">
+              우리는 숫자가 아닌 맥락을 제공합니다. 전 세계의 공개 시장 데이터를 스크래핑하고 가공하여 투자자가 가려워하는 지점을 정확히 짚어냅니다.
             </p>
-          </div>
-
-          {/* Feature 3 */}
-          <div className="bg-[#EBE8E3] rounded-2xl p-8 hover:bg-[#E5E1DB] transition-colors duration-300">
-            <div className="w-16 h-16 mb-6 relative">
-              <Image src="/feature-assets.png" alt="Assets" fill className="object-contain" />
+            <div className="space-y-4 pt-4">
+              {[
+                { icon: ShieldCheck, text: "검증된 실시간 데이터 스크래핑 엔진" },
+                { icon: Users, text: "종목별 특화된 강력한 토론 커뮤니티" },
+                { icon: Zap, text: "AI 기반의 명확한 투자 전망 제시" }
+              ].map((item, id) => (
+                <div key={id} className="flex items-center gap-3 font-bold text-neutral-700">
+                  <div className="p-2 bg-neutral-50 rounded-lg"><item.icon size={20} /></div>
+                  {item.text}
+                </div>
+              ))}
             </div>
-            <h3 className="text-2xl font-serif mb-3">Asset Management</h3>
-            <p className="text-neutral-600 leading-relaxed">
-              Securely track your portfolio performance, manage diversification, and watch your wealth grow in one place.
-            </p>
-            <button className="mt-6 text-sm font-semibold underline underline-offset-4 hover:text-black/70">
-              Explore Tools
-            </button>
           </div>
         </div>
 
-        {/* Simple Footer Call to Action */}
-        <div className="text-center py-20 border-t border-neutral-100">
-          <h2 className="text-4xl font-serif mb-8">Ready to start?</h2>
-          <div className="flex justify-center gap-4">
-            <button className="bg-black text-white px-8 py-4 rounded-full font-medium hover:bg-neutral-800 transition-all">
-              Get Started Now
-            </button>
-            <button className="bg-white text-black border border-neutral-200 px-8 py-4 rounded-full font-medium hover:bg-neutral-50 transition-all">
-              Contact Sales
-            </button>
+        {/* Feature Cards Modern */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-32">
+          {[
+            {
+              title: "Global Search",
+              desc: "미국, 한국, 일본 시장을 넘나드는 심리스한 종목 검색 환경.",
+              color: "bg-white",
+              href: "/stocks"
+            },
+            {
+              title: "Insight Hub",
+              desc: "흩어진 투자 의견을 하나로 모아 보여주는 강력한 토론 허브.",
+              color: "bg-neutral-50",
+              href: "/boards"
+            },
+            {
+              title: "Trust Architecture",
+              desc: "투명한 데이터 공개로 구축하는 견고한 자산 관리 시스템.",
+              color: "bg-[#EBE8E3]",
+              href: "/stocks"
+            }
+          ].map((feature, id) => (
+            <Link
+              key={id}
+              href={feature.href}
+              className={`${feature.color} p-10 rounded-[40px] border border-neutral-100 hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 group`}
+            >
+              <h3 className="text-2xl font-black mb-4 flex items-center justify-between">
+                {feature.title}
+                <ArrowRight className="opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all" size={20} />
+              </h3>
+              <p className="text-neutral-500 leading-relaxed font-medium">
+                {feature.desc}
+              </p>
+            </Link>
+          ))}
+        </div>
+
+        {/* CTA Bottom */}
+        <div className="relative py-24 px-8 rounded-[60px] bg-neutral-900 text-white text-center overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent pointer-events-none" />
+          <h2 className="text-4xl md:text-6xl font-black mb-8 relative z-10">어둠 속에서 빛나는 <br />당신의 통찰력을 Cressets에서.</h2>
+          <div className="flex justify-center gap-6 relative z-10">
+            <Link href="/stocks" className="bg-white text-black px-10 py-4 rounded-full font-black text-lg hover:scale-105 transition-transform active:scale-95">
+              지금 무료로 시작하기
+            </Link>
           </div>
         </div>
 
       </main>
 
-      <footer className="py-12 border-t border-neutral-100 flex flex-col items-center gap-8 bg-neutral-50/50">
-        <div className="flex flex-col items-center gap-4">
-          <h3 className="text-sm font-semibold text-neutral-900 uppercase tracking-wider">Contact</h3>
-          <div className="flex gap-6">
-            <a href="https://github.com/tail-s" target="_blank" rel="noopener noreferrer" className="bg-white p-3 rounded-full shadow-sm hover:shadow-md hover:scale-110 transition-all duration-300 group border border-neutral-100">
-              <span className="sr-only">GitHub</span>
-              <svg className="w-5 h-5 text-neutral-600 group-hover:text-black" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" />
-              </svg>
-            </a>
-            <a href="https://www.linkedin.com/in/oliverslife" target="_blank" rel="noopener noreferrer" className="bg-white p-3 rounded-full shadow-sm hover:shadow-md hover:scale-110 transition-all duration-300 group border border-neutral-100">
-              <span className="sr-only">LinkedIn</span>
-              <svg className="w-5 h-5 text-neutral-600 group-hover:text-[#0077b5]" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path fillRule="evenodd" d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.239-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" clipRule="evenodd" />
-              </svg>
-            </a>
+      <footer className="py-16 border-t border-neutral-100 bg-neutral-50/50">
+        <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-8">
+          <div className="text-2xl font-black tracking-tighter">CRESSETS</div>
+          <div className="flex gap-8 text-sm font-bold text-neutral-500">
+            <Link href="/stocks" className="hover:text-black">Markets</Link>
+            <Link href="/boards" className="hover:text-black">Boards</Link>
+            <a href="#" className="hover:text-black">Privacy</a>
+            <a href="#" className="hover:text-black">Terms</a>
           </div>
-        </div>
-        <div className="text-sm text-neutral-400">
-          © {new Date().getFullYear()} Cressets. All rights reserved.
+          <div className="text-sm text-neutral-400 font-medium">
+            © {new Date().getFullYear()} Cressets. Designed for clarity.
+          </div>
         </div>
       </footer>
     </div>

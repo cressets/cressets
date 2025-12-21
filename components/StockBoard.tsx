@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Post } from '@/types/stock';
-import { getBoardPosts, addPost } from '@/lib/stocks';
+import { getPostsAction, addPostAction } from '@/app/actions/board';
 import { MessageSquare, User, Send, ThumbsUp } from 'lucide-react';
 
 interface StockBoardProps {
@@ -16,7 +16,7 @@ export default function StockBoard({ symbol }: StockBoardProps) {
 
     useEffect(() => {
         const fetchPosts = async () => {
-            const data = await getBoardPosts(symbol);
+            const data = await getPostsAction(symbol);
             setPosts(data);
         };
         fetchPosts();
@@ -26,7 +26,7 @@ export default function StockBoard({ symbol }: StockBoardProps) {
         e.preventDefault();
         if (!newPost.trim() || !author.trim()) return;
 
-        const post = await addPost(symbol, author, newPost);
+        const post = await addPostAction(symbol, author, newPost);
         setPosts([post, ...posts]);
         setNewPost('');
         setAuthor('');

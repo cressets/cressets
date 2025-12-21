@@ -1,4 +1,5 @@
 import { Stock, ChartData, Post, Market } from '@/types/stock';
+import db from './db';
 
 const MOCK_STOCKS: Stock[] = [
     // US Stocks
@@ -27,25 +28,28 @@ export async function searchStocks(query: string): Promise<Stock[]> {
         stock.name.toLowerCase().includes(lowercaseQuery)
     );
 
-    // 만약 검색 결과가 없고, 쿼리가 심볼 형태라면 가상의 데이터 생성 (스크래핑 시뮬레이션)
-    if (filtered.length === 0 && lowercaseQuery.length >= 2) {
+    // 검색 결과가 적거나 없을 때, 새로운 종목 탐색 시뮬레이션
+    if (filtered.length < 3 && lowercaseQuery.length >= 2) {
         const symbol = lowercaseQuery.toUpperCase();
-        const isKorean = /^[0-9]+$/.test(symbol);
+        const isKorean = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(lowercaseQuery) || /^[0-9]+$/.test(symbol);
         const isJapanese = /^[0-9]{4}$/.test(symbol);
 
         const market: Market = isKorean ? 'KR' : isJapanese ? 'JP' : 'US';
         const currency = market === 'US' ? 'USD' : market === 'KR' ? 'KRW' : 'JPY';
         const basePrice = market === 'KR' ? 50000 : market === 'JP' ? 3000 : 150;
 
-        return [{
-            symbol: symbol,
-            name: `${symbol} 주식회사`,
-            price: basePrice + (Math.random() * basePrice * 0.1),
-            change: (Math.random() * 10 - 5),
-            changePercent: (Math.random() * 4 - 2),
-            market: market,
-            currency: currency
-        }];
+        // 이미 결과에 포함되지 않은 경우에만 추가
+        if (!filtered.some(s => s.symbol === symbol)) {
+            filtered.push({
+                symbol: isKorean && !/^[0-9]+$/.test(symbol) ? `K${Math.floor(Math.random() * 900000 + 100000)}` : symbol,
+                name: `${lowercaseQuery} 관련주`,
+                price: basePrice + (Math.random() * basePrice * 0.1),
+                change: (Math.random() * 10 - 5),
+                changePercent: (Math.random() * 4 - 2),
+                market: market,
+                currency: currency
+            });
+        }
     }
 
     return filtered;
@@ -58,7 +62,7 @@ export async function getStockBySymbol(symbol: string): Promise<Stock | undefine
     if (existing) return existing;
 
     // 없는 종목인 경우 실시간 생성 (상세 페이지 접근 시)
-    const isKorean = /^[0-9]+$/.test(symbol);
+    const isKorean = /^[0-9]+$/.test(symbol) || symbol.startsWith('K');
     const isJapanese = /^[0-9]{4}$/.test(symbol);
     const market: Market = isKorean ? 'KR' : isJapanese ? 'JP' : 'US';
     const currency = market === 'US' ? 'USD' : market === 'KR' ? 'KRW' : 'JPY';
@@ -66,7 +70,7 @@ export async function getStockBySymbol(symbol: string): Promise<Stock | undefine
 
     return {
         symbol: symbol.toUpperCase(),
-        name: `${symbol.toUpperCase()} 분석 정보`,
+        name: `${symbol.toUpperCase()} 분석 기업`,
         price: basePrice + (Math.random() * basePrice * 0.1),
         change: (Math.random() * 10 - 5),
         changePercent: (Math.random() * 4 - 2),
@@ -79,13 +83,12 @@ export async function getStockChartData(symbol: string): Promise<ChartData[]> {
     const stock = await getStockBySymbol(symbol);
     if (!stock) return [];
 
-    // Generate random walking data for the demo
     const data: ChartData[] = [];
     let currentPrice = stock.price * 0.95;
     const now = new Date();
 
     for (let i = 0; i < 20; i++) {
-        const time = new Date(now.getTime() - (20 - i) * 3600000); // Hourly data
+        const time = new Date(now.getTime() - (20 - i) * 3600000);
         currentPrice = currentPrice * (1 + (Math.random() * 0.02 - 0.01));
         data.push({
             time: time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -93,7 +96,6 @@ export async function getStockChartData(symbol: string): Promise<ChartData[]> {
         });
     }
 
-    // Ensure the last price is the current price
     data.push({
         time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         price: stock.price
@@ -102,29 +104,27 @@ export async function getStockChartData(symbol: string): Promise<ChartData[]> {
     return data;
 }
 
-// In-memory posts for the demo
-const MOCK_POSTS: Record<string, Post[]> = {};
-
 export async function getBoardPosts(symbol: string): Promise<Post[]> {
-    if (!MOCK_POSTS[symbol]) {
-        MOCK_POSTS[symbol] = [
-            { id: '1', author: '주식왕', content: `${symbol} 오늘 전고점 돌파할까요?`, createdAt: '2025-12-21 10:00', likes: 12 },
-            { id: '2', author: '개미', content: '방금 추매했습니다. 가즈아!', createdAt: '2025-12-21 10:15', likes: 5 },
-        ];
-    }
-    return MOCK_POSTS[symbol];
+    const posts = db.prepare('SELECT * FROM posts WHERE symbol = ? ORDER BY createdAt DESC').all(symbol) as any[];
+    return posts.map(p => ({
+        ...p,
+        id: p.id.toString(),
+        createdAt: new Date(p.createdAt).toLocaleString()
+    }));
 }
 
 export async function addPost(symbol: string, author: string, content: string): Promise<Post> {
-    const newPost: Post = {
-        id: Date.now().toString(),
+    const id = Date.now().toString();
+    const createdAt = new Date().toISOString();
+
+    db.prepare('INSERT INTO posts (id, symbol, author, content, createdAt) VALUES (?, ?, ?, ?, ?)')
+        .run(id, symbol, author, content, createdAt);
+
+    return {
+        id,
         author,
         content,
-        createdAt: new Date().toLocaleString(),
+        createdAt: new Date(createdAt).toLocaleString(),
         likes: 0
     };
-
-    if (!MOCK_POSTS[symbol]) MOCK_POSTS[symbol] = [];
-    MOCK_POSTS[symbol].unshift(newPost);
-    return newPost;
 }
