@@ -114,29 +114,36 @@ export async function getStockBySymbol(symbol: string): Promise<Stock | undefine
     }
 }
 
-export async function getStockChartData(symbol: string): Promise<ChartData[]> {
-    const stock = await getStockBySymbol(symbol);
-    if (!stock) return [];
+export async function getStockChartData(symbol: string, range: string = '1d'): Promise<ChartData[]> {
+    try {
+        let interval = '15m';
+        if (range === '1d') interval = '5m';
+        else if (range === '5d') interval = '30m';
+        else if (range === '1mo') interval = '1d';
+        else if (range === '1y') interval = '1wk';
 
-    const data: ChartData[] = [];
-    let currentPrice = stock.price * 0.95;
-    const now = new Date();
+        const chartUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?range=${range}&interval=${interval}`;
+        const res = await fetch(chartUrl);
+        const data = await res.json();
 
-    for (let i = 0; i < 20; i++) {
-        const time = new Date(now.getTime() - (20 - i) * 3600000);
-        currentPrice = currentPrice * (1 + (Math.random() * 0.02 - 0.01));
-        data.push({
-            time: time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            price: Number(currentPrice.toFixed(2))
-        });
+        if (!data.chart || !data.chart.result || data.chart.result.length === 0) return [];
+
+        const result = data.chart.result[0];
+        const timestamps = result.timestamp;
+        const prices = result.indicators.quote[0].close;
+
+        if (!timestamps || !prices) return [];
+
+        return timestamps.map((ts: number, i: number) => ({
+            time: range === '1d' || range === '5d'
+                ? new Date(ts * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                : new Date(ts * 1000).toLocaleDateString([], { month: '2-digit', day: '2-digit' }),
+            price: prices[i] ? Number(prices[i].toFixed(2)) : null
+        })).filter((d: any) => d.price !== null) as ChartData[];
+    } catch (error) {
+        console.error('GetStockChartData API Error:', error);
+        return [];
     }
-
-    data.push({
-        time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        price: stock.price
-    });
-
-    return data;
 }
 
 export interface StockNews {

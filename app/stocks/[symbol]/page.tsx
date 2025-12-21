@@ -23,26 +23,36 @@ export default function StockDetailPage({ params }: PageProps) {
     const [stats, setStats] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [selectedNews, setSelectedNews] = useState<StockNews | null>(null);
+    const [timeframe, setTimeframe] = useState('1d');
+    const [chartLoading, setChartLoading] = useState(false);
 
     useEffect(() => {
-        const fetchData = async () => {
-            const [stockData, chart, newsData, statsData] = await Promise.all([
+        const fetchInitialData = async () => {
+            const [stockData, newsData, statsData] = await Promise.all([
                 getStockBySymbol(symbol),
-                getStockChartData(symbol),
                 getStockNews(symbol),
                 getStockStats(symbol)
             ]);
 
             if (stockData) {
                 setStock(stockData);
-                setChartData(chart);
                 setNews(newsData);
                 setStats(statsData);
             }
             setLoading(false);
         };
-        fetchData();
+        fetchInitialData();
     }, [symbol]);
+
+    useEffect(() => {
+        const fetchChart = async () => {
+            setChartLoading(true);
+            const chart = await getStockChartData(symbol, timeframe);
+            setChartData(chart);
+            setChartLoading(false);
+        };
+        fetchChart();
+    }, [symbol, timeframe]);
 
     if (loading) {
         return (
@@ -111,13 +121,33 @@ export default function StockDetailPage({ params }: PageProps) {
                                     실시간 차트
                                 </h3>
                                 <div className="flex gap-2">
-                                    <span className="px-3 py-1 bg-black text-white text-[10px] font-bold rounded-lg cursor-pointer">1D</span>
-                                    <span className="px-3 py-1 bg-neutral-100 text-neutral-900 text-[10px] font-bold rounded-lg cursor-pointer hover:bg-neutral-200">1W</span>
-                                    <span className="px-3 py-1 bg-neutral-100 text-neutral-900 text-[10px] font-bold rounded-lg cursor-pointer hover:bg-neutral-200">1M</span>
-                                    <span className="px-3 py-1 bg-neutral-100 text-neutral-900 text-[10px] font-bold rounded-lg cursor-pointer hover:bg-neutral-200">1Y</span>
+                                    {[
+                                        { label: '1D', value: '1d' },
+                                        { label: '1W', value: '5d' },
+                                        { label: '1M', value: '1mo' },
+                                        { label: '1Y', value: '1y' }
+                                    ].map((tf) => (
+                                        <button
+                                            key={tf.value}
+                                            onClick={() => setTimeframe(tf.value)}
+                                            className={`px-3 py-1 text-[10px] font-bold rounded-lg transition-all ${timeframe === tf.value
+                                                ? 'bg-black text-white shadow-md'
+                                                : 'bg-neutral-100 text-neutral-900 hover:bg-neutral-200'
+                                                }`}
+                                        >
+                                            {tf.label}
+                                        </button>
+                                    ))}
                                 </div>
                             </div>
-                            <StockChart data={chartData} isPositive={isPositive} />
+                            <div className={`relative ${chartLoading ? 'opacity-50' : 'opacity-100'} transition-opacity`}>
+                                {chartLoading && (
+                                    <div className="absolute inset-0 flex items-center justify-center z-10">
+                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black"></div>
+                                    </div>
+                                )}
+                                <StockChart data={chartData} isPositive={isPositive} />
+                            </div>
                         </div>
 
                         {/* News Section */}
@@ -134,8 +164,8 @@ export default function StockDetailPage({ params }: PageProps) {
                                         className="block group w-full text-left"
                                     >
                                         <div className="flex justify-between items-start mb-1">
-                                            <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">{n.source}</span>
-                                            <span className="text-[10px] text-neutral-500">{n.time}</span>
+                                            <span className="text-[10px] font-black text-neutral-800 uppercase tracking-widest">{n.source}</span>
+                                            <span className="text-[10px] text-neutral-900 font-bold">{n.time}</span>
                                         </div>
                                         <h4 className="text-base font-bold group-hover:text-blue-600 transition-colors leading-snug text-neutral-900">
                                             {n.title}
@@ -215,7 +245,7 @@ export default function StockDetailPage({ params }: PageProps) {
                                     <span className="px-3 py-1 bg-neutral-100 rounded-full text-[10px] font-bold text-neutral-900 uppercase">
                                         {selectedNews.source}
                                     </span>
-                                    <span className="text-[10px] font-bold text-neutral-500">
+                                    <span className="text-[10px] font-black text-neutral-900">
                                         {selectedNews.time}
                                     </span>
                                 </div>

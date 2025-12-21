@@ -49,11 +49,11 @@ export default function StockBoard({ symbol }: StockBoardProps) {
             <form onSubmit={handleSubmit} className="mb-10 space-y-4">
                 <div className="flex gap-4">
                     <div className="relative flex-1">
-                        <User className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400 w-4 h-4" />
+                        <User className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-900 w-4 h-4" />
                         <input
                             type="text"
                             placeholder="닉네임"
-                            className="w-full pl-10 pr-4 py-3 bg-neutral-50 border border-neutral-100 rounded-xl focus:ring-2 focus:ring-neutral-900 outline-none transition-all"
+                            className="w-full pl-10 pr-4 py-3 bg-neutral-50 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-neutral-900 outline-none transition-all text-neutral-900 font-bold placeholder:text-neutral-500"
                             value={author}
                             onChange={(e) => setAuthor(e.target.value)}
                             required
@@ -63,7 +63,7 @@ export default function StockBoard({ symbol }: StockBoardProps) {
                 <div className="relative">
                     <textarea
                         placeholder="이 종목에 대해 어떻게 생각하시나요?"
-                        className="w-full p-4 pb-12 bg-neutral-50 border border-neutral-100 rounded-2xl focus:ring-2 focus:ring-neutral-900 outline-none transition-all min-h-[120px] resize-none"
+                        className="w-full p-4 pb-12 bg-neutral-50 border border-neutral-200 rounded-2xl focus:ring-2 focus:ring-neutral-900 outline-none transition-all min-h-[120px] resize-none text-neutral-900 font-medium placeholder:text-neutral-500"
                         value={newPost}
                         onChange={(e) => setNewPost(e.target.value)}
                         required
@@ -85,16 +85,16 @@ export default function StockBoard({ symbol }: StockBoardProps) {
                             <div className="flex justify-between items-start mb-2">
                                 <div className="flex items-center gap-2">
                                     <div className="w-8 h-8 rounded-full bg-neutral-100 flex items-center justify-center">
-                                        <User size={14} className="text-neutral-800" />
+                                        <User size={14} className="text-neutral-900" />
                                     </div>
-                                    <span className="font-bold text-sm text-neutral-900">{post.author}</span>
-                                    <span className="text-xs text-neutral-600 font-medium">{post.createdAt}</span>
+                                    <span className="font-black text-sm text-neutral-900">{post.author}</span>
+                                    <span className="text-xs text-neutral-800 font-bold">{post.createdAt}</span>
                                 </div>
                                 <button
                                     onClick={() => handleLike(post.id)}
-                                    className="flex items-center gap-1.5 text-xs font-semibold text-neutral-600 hover:text-red-500 transition-colors bg-neutral-50 px-3 py-1.5 rounded-full hover:bg-red-50"
+                                    className="flex items-center gap-1.5 text-xs font-black text-neutral-900 hover:text-red-500 transition-colors bg-neutral-100 px-3 py-1.5 rounded-full hover:bg-red-50 border border-neutral-200"
                                 >
-                                    <ThumbsUp size={14} className={post.likes > 0 ? 'fill-red-500 text-red-500' : ''} />
+                                    <ThumbsUp size={14} className={post.likes > 0 ? 'fill-red-500 text-red-500' : 'text-neutral-900'} />
                                     {post.likes}
                                 </button>
                             </div>
@@ -104,7 +104,7 @@ export default function StockBoard({ symbol }: StockBoardProps) {
                         </div>
                     ))
                 ) : (
-                    <div className="py-10 text-center text-neutral-800 italic font-medium">
+                    <div className="py-10 text-center text-neutral-900 italic font-black">
                         아직 작성된 의견이 없습니다. 첫 번째 의견을 남겨보세요!
                     </div>
                 )}

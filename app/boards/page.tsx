@@ -61,8 +61,8 @@ export default function BoardsHubPage() {
                                                 <User size={18} />
                                             </div>
                                             <div>
-                                                <div className="font-bold text-sm text-neutral-900">{post.author}</div>
-                                                <div className="text-xs text-neutral-600 font-bold">{post.createdAt}</div>
+                                                <div className="font-black text-sm text-neutral-900">{post.author}</div>
+                                                <div className="text-xs text-neutral-800 font-bold">{post.createdAt}</div>
                                             </div>
                                         </div>
                                         <Link
@@ -78,8 +78,8 @@ export default function BoardsHubPage() {
                                 </div>
                             ))
                         ) : (
-                            <div className="py-20 text-center bg-white rounded-3xl border border-dashed border-neutral-200">
-                                <p className="text-neutral-400">아직 작성된 게시글이 없습니다.</p>
+                            <div className="py-20 text-center bg-white rounded-3xl border border-dashed border-neutral-300">
+                                <p className="text-neutral-900 font-black italic">아직 작성된 게시글이 없습니다. 첫 번째 의견을 남겨보세요!</p>
                             </div>
                         )}
                     </div>
@@ -115,8 +115,8 @@ export default function BoardsHubPage() {
                         </div>
 
                         <div className="bg-[#EBE8E3] p-8 rounded-[40px] border border-[#E5E1DB]">
-                            <h3 className="text-xl font-bold mb-4 italic">Cressets Insights</h3>
-                            <p className="text-neutral-600 text-sm leading-relaxed">
+                            <h3 className="text-xl font-bold mb-4 italic text-neutral-900">Cressets Insights</h3>
+                            <p className="text-neutral-800 text-sm leading-relaxed font-bold">
                                 토론 섹션은 실제 투자자들의 심리를 반영합니다. 다양한 의견을 경청하시되, 투자는 본인의 확신 하에 진행하세요.
                             </p>
                         </div>

@@ -28,7 +28,7 @@ export default function StockChart({ data, isPositive }: StockChartProps) {
                         dataKey="time"
                         axisLine={false}
                         tickLine={false}
-                        tick={{ fill: '#9ca3af', fontSize: 12 }}
+                        tick={{ fill: '#171717', fontSize: 12, fontWeight: 700 }}
                         minTickGap={30}
                     />
                     <YAxis
