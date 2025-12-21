@@ -21,9 +21,9 @@ export async function getInsightsAction() {
     // 1. 마지막 스크래핑 시간 확인
     const lastScrape = db.prepare('SELECT value FROM metadata WHERE key = ?').get('last_insight_scrape') as { value: string } | undefined;
     const now = new Date();
-    const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000);
+    const oneHourAgo = new Date(now.getTime() - 1 * 60 * 60 * 1000);
 
-    if (!lastScrape || new Date(lastScrape.value) < twoHoursAgo) {
+    if (!lastScrape || new Date(lastScrape.value) < oneHourAgo) {
         await scrapeInsights();
     }
 
@@ -46,7 +46,7 @@ export async function getInsightsAction() {
 async function scrapeInsights() {
     const now = new Date();
     try {
-        console.log('Scraping real-time market insights (Global & Domestic)...');
+        console.log('Scraping real-time market insights from Naver Finance (Flash News)...');
 
         const insert = db.prepare(`
             INSERT INTO insights (id, category, title, summary, author, time, image, content, url)
@@ -56,56 +56,31 @@ async function scrapeInsights() {
         // 기존 데이터 삭제
         db.prepare('DELETE FROM insights').run();
 
-        // 1. Yahoo Finance (Global News)
-        try {
-            const yahooUrl = `https://query1.finance.yahoo.com/v1/finance/search?q=market&newsCount=25`;
-            const yRes = await fetch(yahooUrl);
-            const yData = await yRes.json();
+        // Naver Finance Flash News API
+        const naverUrl = `https://m.stock.naver.com/front-api/news/category?category=flashnews&pageSize=50&page=1`;
+        const res = await fetch(naverUrl, { cache: 'no-store' });
+        const data = await res.json();
 
-            if (yData.news) {
-                for (const item of yData.news) {
-                    const id = item.uuid || Math.random().toString(36).substr(2, 9);
-                    const title = item.title;
-                    const summary = item.publisher + ' - Global Market Insight';
-                    const author = item.publisher;
-                    const time = formatTime(item.providerPublishTime * 1000);
-                    const url = item.link;
-                    const category = '해외 뉴스';
-                    const image = (item.thumbnail && item.thumbnail.resolutions && item.thumbnail.resolutions[0].url)
-                        || `https://images.unsplash.com/photo-1611974717482-480929974861?auto=format&fit=crop&q=80&w=800&sig=${id}`;
-                    const content = `[${author}] ${title}\n\n이 기사는 Yahoo Finance를 통해 실시간으로 수집된 해외 시장 소식입니다.\n\n해당 리포트는 Cressets의 데이터 엔진에 의해 분석되었습니다.`;
+        if (data.isSuccess && data.result) {
+            for (const item of data.result) {
+                const id = item.articleId;
+                const title = item.title;
+                const author = item.officeName;
+                const summary = `[${author}] ${title.substring(0, 50)}...`;
 
-                    insert.run(id, category, title, summary, author, time, image, content, url);
-                }
+                // Naver format: YYYYMMDDHHMMSS -> Readable format or relative
+                const time = formatNaverTime(item.datetime);
+                const url = `https://m.stock.naver.com/investment/news/flashnews/view/${item.articleId}`;
+
+                // 카테고리 랜덤 또는 키워드 기반 (기본: 실시간 속보)
+                const category = '실시간 속보';
+
+                const image = item.imageOriginLink || `https://images.unsplash.com/photo-1611974717482-480929974861?auto=format&fit=crop&q=80&w=800&sig=${id}`;
+
+                const content = `${item.body || title}\n\n이 기사는 네이버 금융 실시간 속보를 통해 수집되었습니다. 자세한 내용은 원본 링크를 통해 확인해 주세요.`;
+
+                insert.run(id, category, title, summary, author, time, image, content, url);
             }
-        } catch (e) {
-            console.error('Yahoo Scrape Error:', e);
-        }
-
-        // 2. Naver Finance (Domestic News)
-        try {
-            // 네이버 주요 뉴스 API
-            const naverUrl = `https://m.stock.naver.com/api/news/mainlist?pageSize=25&page=1`;
-            const nRes = await fetch(naverUrl);
-            const nData = await nRes.json();
-
-            if (nData && Array.isArray(nData)) {
-                for (const item of nData) {
-                    const id = item.artId || Math.random().toString(36).substr(2, 9);
-                    const title = item.title;
-                    const summary = item.officeNm + ' - 국내 시장 인사이트';
-                    const author = item.officeNm;
-                    const time = item.dt; // "20분 전" 등
-                    const url = `https://m.stock.naver.com/domestic/stock/home/news/view/${item.artId}`;
-                    const category = CATEGORIES[Math.floor(Math.random() * 2)]; // 시장 분석 or 전문가 칼럼
-                    const image = item.thumbUrl || `https://images.unsplash.com/photo-1611974717482-480929974861?auto=format&fit=crop&q=80&w=800&sig=${id}`;
-                    const content = `[${author}] ${title}\n\n이 기사는 네이버 금융을 통해 실시간으로 수집된 국내 시장 소식입니다.\n\nCressets의 데이터 분석 시스템이 요약한 결과, 해당 기사는 현재 ${category} 분야에서 높은 주목도를 보이고 있습니다.`;
-
-                    insert.run(id, category, title, summary, author, time, image, content, url);
-                }
-            }
-        } catch (e) {
-            console.error('Naver Scrape Error:', e);
         }
 
         // 마지막 스크래핑 시간 저장
@@ -117,8 +92,19 @@ async function scrapeInsights() {
     }
 }
 
-function formatTime(timestamp: number) {
-    const diff = (Date.now() - timestamp) / 1000;
+function formatNaverTime(naverDate: string) {
+    if (!naverDate || naverDate.length < 12) return '방금 전';
+    // YYYYMMDDHHMMSS
+    const year = parseInt(naverDate.substring(0, 4));
+    const month = parseInt(naverDate.substring(4, 6)) - 1;
+    const day = parseInt(naverDate.substring(6, 8));
+    const hour = parseInt(naverDate.substring(8, 10));
+    const minute = parseInt(naverDate.substring(10, 12));
+
+    const date = new Date(year, month, day, hour, minute);
+    const diff = (Date.now() - date.getTime()) / 1000;
+
+    if (diff < 60) return '방금 전';
     if (diff < 3600) return Math.floor(diff / 60) + '분 전';
     if (diff < 86400) return Math.floor(diff / 3600) + '시간 전';
     return Math.floor(diff / 86400) + '일 전';

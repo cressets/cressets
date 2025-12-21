@@ -1,33 +1,5 @@
 import { Stock, ChartData, Market } from '@/types/stock';
 
-const TOP_STOCKS_KR: Stock[] = [
-    { symbol: '005930', name: '삼성전자', price: 72500, change: 800, changePercent: 1.12, market: 'KR', currency: 'KRW' },
-    { symbol: '000660', name: 'SK하이닉스', price: 140200, change: 3100, changePercent: 2.26, market: 'KR', currency: 'KRW' },
-    { symbol: '005935', name: '삼성전자우', price: 58900, change: 400, changePercent: 0.68, market: 'KR', currency: 'KRW' },
-    { symbol: '207940', name: '삼성바이오로직스', price: 812000, change: 12000, changePercent: 1.50, market: 'KR', currency: 'KRW' },
-    { symbol: '005380', name: '현대차', price: 235000, change: -2500, changePercent: -1.05, market: 'KR', currency: 'KRW' },
-    { symbol: '068270', name: '셀트리온', price: 178500, change: 4200, changePercent: 2.41, market: 'KR', currency: 'KRW' },
-    { symbol: '005490', name: 'POSCO홀딩스', price: 395000, change: -1500, changePercent: -0.38, market: 'KR', currency: 'KRW' },
-    { symbol: '051910', name: 'LG화학', price: 412000, change: -8000, changePercent: -1.90, market: 'KR', currency: 'KRW' },
-    { symbol: '035420', name: 'NAVER', price: 215000, change: -1500, changePercent: -0.69, market: 'KR', currency: 'KRW' },
-    { symbol: '000270', name: '기아', price: 112000, change: 1500, changePercent: 1.36, market: 'KR', currency: 'KRW' },
-];
-
-const TOP_STOCKS_US: Stock[] = [
-    { symbol: 'AAPL', name: 'Apple Inc.', price: 185.92, change: 1.25, changePercent: 0.68, market: 'US', currency: 'USD' },
-    { symbol: 'MSFT', name: 'Microsoft Corporation', price: 374.58, change: 4.12, changePercent: 1.11, market: 'US', currency: 'USD' },
-    { symbol: 'NVDA', name: 'NVIDIA Corporation', price: 495.22, change: 12.45, changePercent: 2.58, market: 'US', currency: 'USD' },
-    { symbol: 'GOOGL', name: 'Alphabet Inc.', price: 142.33, change: 0.85, changePercent: 0.60, market: 'US', currency: 'USD' },
-    { symbol: 'AMZN', name: 'Amazon.com, Inc.', price: 154.07, change: 1.32, changePercent: 0.86, market: 'US', currency: 'USD' },
-    { symbol: 'META', name: 'Meta Platforms, Inc.', price: 353.39, change: 4.56, changePercent: 1.31, market: 'US', currency: 'USD' },
-    { symbol: 'TSLA', name: 'Tesla, Inc.', price: 238.45, change: -2.30, changePercent: -0.95, market: 'US', currency: 'USD' },
-    { symbol: 'BRK-B', name: 'Berkshire Hathaway Inc.', price: 362.45, change: 0.85, changePercent: 0.23, market: 'US', currency: 'USD' },
-    { symbol: 'V', name: 'Visa Inc.', price: 258.12, change: 1.12, changePercent: 0.44, market: 'US', currency: 'USD' },
-    { symbol: 'UNH', name: 'UnitedHealth Group Inc.', price: 524.33, change: -3.45, changePercent: -0.65, market: 'US', currency: 'USD' },
-];
-
-const ALL_TOP_STOCKS = [...TOP_STOCKS_KR, ...TOP_STOCKS_US];
-
 export async function searchStocks(query: string): Promise<Stock[]> {
     const lowercaseQuery = query.toLowerCase().trim();
 
@@ -51,7 +23,7 @@ export async function searchStocks(query: string): Promise<Stock[]> {
         } catch (e) {
             console.warn('Naver Top API failed:', e);
         }
-        return ALL_TOP_STOCKS;
+        return [];
     }
     try {
         // Yahoo Finance Search API 활용 (실제 종목 검색)
@@ -60,11 +32,7 @@ export async function searchStocks(query: string): Promise<Stock[]> {
         const data = await res.json();
 
         if (!data.quotes || data.quotes.length === 0) {
-            // 결과가 없을 경우 기존 필터링 결과 반환
-            return ALL_TOP_STOCKS.filter(stock =>
-                stock.symbol.toLowerCase().includes(lowercaseQuery) ||
-                stock.name.toLowerCase().includes(lowercaseQuery)
-            );
+            return [];
         }
 
         const symbols = data.quotes
@@ -85,10 +53,10 @@ export async function searchStocks(query: string): Promise<Stock[]> {
             return {
                 symbol: q.symbol,
                 name: q.longName || q.shortName || q.symbol,
-                price: q.regularMarketPrice,
-                change: q.regularMarketChange,
-                changePercent: q.regularMarketChangePercent,
-                market: isKR ? 'KR' : isJP ? 'JP' : 'US',
+                price: isKR ? Math.floor(q.regularMarketPrice) : Number(q.regularMarketPrice.toFixed(2)),
+                change: isKR ? Math.floor(q.regularMarketChange) : Number(q.regularMarketChange.toFixed(2)),
+                changePercent: Number(q.regularMarketChangePercent.toFixed(2)),
+                market: isKR ? (q.symbol.endsWith('.KS') ? 'KOSPI' : 'KOSDAQ') : isJP ? 'JP' : 'US',
                 currency: q.currency
             };
         });
@@ -96,22 +64,18 @@ export async function searchStocks(query: string): Promise<Stock[]> {
         return results;
     } catch (error) {
         console.error('Search API Error:', error);
-        // 에러 시 기존 목업 필터링이라도 수행
-        return ALL_TOP_STOCKS.filter(stock =>
-            stock.symbol.toLowerCase().includes(lowercaseQuery) ||
-            stock.name.toLowerCase().includes(lowercaseQuery)
-        );
+        return [];
     }
 }
 
 export async function getStockBySymbol(symbol: string): Promise<Stock | undefined> {
     try {
-        // 한국 주식의 경우 네이버 API 시도
+        // 1. 한국 주식의 경우 네이버 API 우선 시도 (가장 정확)
         if (symbol.endsWith('.KS') || symbol.endsWith('.KQ')) {
             const code = symbol.split('.')[0];
             try {
                 const naverUrl = `https://polling.finance.naver.com/api/realtime/domestic/stock/${code}`;
-                const res = await fetch(naverUrl);
+                const res = await fetch(naverUrl, { cache: 'no-store' });
                 const data = await res.json();
 
                 if (data.result && data.result.areas && data.result.areas.length > 0) {
@@ -131,12 +95,13 @@ export async function getStockBySymbol(symbol: string): Promise<Stock | undefine
             }
         }
 
+        // 2. 해외 주식 또는 네이버 실패 시 Yahoo Finance Quote API 사용
         const quoteUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbol}`;
-        const res = await fetch(quoteUrl);
+        const res = await fetch(quoteUrl, { cache: 'no-store' });
         const data = await res.json();
 
         if (!data.quoteResponse.result || data.quoteResponse.result.length === 0) {
-            return ALL_TOP_STOCKS.find(s => s.symbol.toLowerCase() === symbol.toLowerCase());
+            return undefined;
         }
 
         const q = data.quoteResponse.result[0];
@@ -146,17 +111,18 @@ export async function getStockBySymbol(symbol: string): Promise<Stock | undefine
         return {
             symbol: q.symbol,
             name: q.longName || q.shortName || q.symbol,
-            price: q.regularMarketPrice,
-            change: q.regularMarketChange,
-            changePercent: q.regularMarketChangePercent,
+            price: isKR ? Math.floor(q.regularMarketPrice) : Number(q.regularMarketPrice.toFixed(2)),
+            change: isKR ? Math.floor(q.regularMarketChange) : Number(q.regularMarketChange.toFixed(2)),
+            changePercent: Number(q.regularMarketChangePercent.toFixed(2)),
             market: isKR ? (q.symbol.endsWith('.KS') ? 'KOSPI' : 'KOSDAQ') : isJP ? 'JP' : 'US',
             currency: q.currency
         };
     } catch (error) {
         console.error('GetStockBySymbol API Error:', error);
-        return ALL_TOP_STOCKS.find(s => s.symbol.toLowerCase() === symbol.toLowerCase());
+        return undefined;
     }
 }
+
 
 export async function getStockChartData(symbol: string, range: string = '1d'): Promise<ChartData[]> {
     try {
