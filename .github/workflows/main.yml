@@ -68,6 +68,7 @@ jobs:
           username: ubuntu
           key: ${{ secrets.SSH_KEY }}
           port: 22
+          command_timeout: 30m
           script: |
             # 환경 변수 로드 (NVM, NPM, PM2 경로 확보)
             [ -s "$HOME/.profile" ] && source "$HOME/.profile"
@@ -82,9 +83,8 @@ jobs:
             rm artifact.tar.gz
 
             # 프로덕션 의존성만 설치
-            npm ci --production
+            npm ci --omit=dev
 
             # PM2 재시작 (앱이 없으면 start, 있으면 reload)
-            pm2 describe cressets || pm2 start npm --name "cressets" -- start -- -p 3000
-            pm2 reload cressets
+            pm2 describe cressets > /dev/null 2>&1 && pm2 reload cressets || pm2 start npm --name "cressets" -- start -- -p 3000
             pm2 save
