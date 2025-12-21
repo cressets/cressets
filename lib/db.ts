@@ -37,6 +37,19 @@ db.exec(`
     scrapedAt DATETIME DEFAULT CURRENT_TIMESTAMP
   );
 
+  CREATE TABLE IF NOT EXISTS stock_news (
+    id TEXT PRIMARY KEY,
+    symbol TEXT NOT NULL,
+    title TEXT NOT NULL,
+    source TEXT,
+    time TEXT,
+    content TEXT,
+    url TEXT,
+    scrapedAt DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_stock_news_symbol ON stock_news(symbol);
+
   CREATE TABLE IF NOT EXISTS metadata (
     key TEXT PRIMARY KEY,
     value TEXT

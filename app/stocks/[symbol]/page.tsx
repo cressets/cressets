@@ -4,7 +4,8 @@ import { useState, useEffect, use } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, TrendingUp, TrendingDown, Info, Globe2, Clock, Newspaper, X } from 'lucide-react';
 import { Stock, ChartData } from '@/types/stock';
-import { getStockBySymbol, getStockChartData, getStockNews, getStockStats, StockNews } from '@/lib/stocks';
+import { getStockBySymbol, getStockChartData, getStockStats, StockNews } from '@/lib/stocks';
+import { getStockNewsAction } from '@/app/actions/stock-news';
 import StockChart from '@/components/StockChart';
 import StockBoard from '@/components/StockBoard';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -30,7 +31,7 @@ export default function StockDetailPage({ params }: PageProps) {
         const fetchInitialData = async () => {
             const [stockData, newsData, statsData] = await Promise.all([
                 getStockBySymbol(symbol),
-                getStockNews(symbol),
+                getStockNewsAction(symbol),
                 getStockStats(symbol)
             ]);
 
