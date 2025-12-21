@@ -17,7 +17,7 @@ export interface Insight {
 
 const CATEGORIES = ['시장 분석', '전문가 칼럼', '해외 뉴스', '산업 트렌드'];
 
-export async function getInsightsAction() {
+export async function getInsightsAction(): Promise<{ insights: Insight[], lastScrapedAt: string | null }> {
     // 1. 마지막 스크래핑 시간 확인
     const lastScrape = db.prepare('SELECT value FROM metadata WHERE key = ?').get('last_insight_scrape') as { value: string } | undefined;
     const now = new Date();
@@ -29,18 +29,22 @@ export async function getInsightsAction() {
 
     // 2. DB에서 데이터 가져오기 (최신순)
     const results = db.prepare('SELECT * FROM insights ORDER BY scrapedAt DESC LIMIT 50').all() as any[];
+    const lastScrapedAt = lastScrape ? lastScrape.value : null;
 
-    return results.map(r => ({
-        id: r.id,
-        category: r.category,
-        title: r.title,
-        summary: r.summary,
-        author: r.author,
-        time: r.time,
-        image: r.image,
-        content: r.content,
-        url: r.url
-    })) as Insight[];
+    return {
+        insights: results.map(r => ({
+            id: r.id,
+            category: r.category,
+            title: r.title,
+            summary: r.summary,
+            author: r.author,
+            time: r.time,
+            image: r.image,
+            content: r.content,
+            url: r.url
+        })),
+        lastScrapedAt
+    };
 }
 
 async function scrapeInsights() {

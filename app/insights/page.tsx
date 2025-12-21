@@ -14,17 +14,18 @@ export default function InsightsPage() {
     const [activeCategory, setActiveCategory] = useState('전체');
     const [selectedInsight, setSelectedInsight] = useState<Insight | null>(null);
     const [insights, setInsights] = useState<Insight[]>([]);
+    const [lastScraped, setLastScraped] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchInsights = async () => {
-            const data = await getInsightsAction();
-            setInsights(data);
+            const response = await getInsightsAction();
+            setInsights(response.insights);
+            setLastScraped(response.lastScrapedAt);
             setLoading(false);
         };
         fetchInsights();
     }, []);
-
     const filteredPosts = activeCategory === '전체'
         ? insights
         : insights.filter(p => p.category === activeCategory);
@@ -34,12 +35,20 @@ export default function InsightsPage() {
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header */}
                 <div className="mb-12">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-neutral-900 text-white text-[10px] font-black tracking-widest uppercase mb-6">
-                        <Zap size={14} className="fill-white" />
-                        Insight Hub
+                    <div className="flex items-center gap-4 mb-6">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-neutral-900 text-white text-[10px] font-black tracking-widest uppercase">
+                            <Zap size={14} className="fill-white" />
+                            인사이트 허브
+                        </div>
+                        {lastScraped && (
+                            <span className="text-[10px] font-bold text-neutral-500 bg-neutral-100 px-3 py-1 rounded-full flex items-center gap-1">
+                                <Clock size={12} />
+                                마지막 업데이트: {new Date(lastScraped).toLocaleString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                        )}
                     </div>
                     <h1 className="text-5xl md:text-6xl font-black tracking-tighter text-neutral-900 mb-6 font-serif">
-                        Market Wisdom & <br /> Real-time Analytics.
+                        시장 통찰력 & <br /> 실시간 분석 리포트.
                     </h1>
                     <p className="text-xl text-neutral-900 max-w-2xl leading-relaxed font-medium">
                         Cressets의 데이터 엔진이 수집한 전 세계의 주요 인사이트와 뉴스, <br />그리고 전문가들의 깊이 있는 분석을 한눈에 확인하세요.

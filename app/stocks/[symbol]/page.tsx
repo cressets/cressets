@@ -21,6 +21,7 @@ export default function StockDetailPage({ params }: PageProps) {
     const [stock, setStock] = useState<Stock | null>(null);
     const [chartData, setChartData] = useState<ChartData[]>([]);
     const [news, setNews] = useState<StockNews[]>([]);
+    const [newsLastScraped, setNewsLastScraped] = useState<string | null>(null);
     const [stats, setStats] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [selectedNews, setSelectedNews] = useState<StockNews | null>(null);
@@ -29,16 +30,21 @@ export default function StockDetailPage({ params }: PageProps) {
 
     useEffect(() => {
         const fetchInitialData = async () => {
-            const [stockData, newsData, statsData] = await Promise.all([
-                getStockBySymbol(symbol),
-                getStockNewsAction(symbol),
-                getStockStats(symbol)
-            ]);
+            try {
+                const [stockData, newsResponse, statsData] = await Promise.all([
+                    getStockBySymbol(symbol),
+                    getStockNewsAction(symbol),
+                    getStockStats(symbol)
+                ]);
 
-            if (stockData) {
-                setStock(stockData);
-                setNews(newsData);
-                setStats(statsData);
+                if (stockData) {
+                    setStock(stockData);
+                    setNews(newsResponse.news);
+                    setNewsLastScraped(newsResponse.lastScrapedAt);
+                    setStats(statsData);
+                }
+            } catch (error) {
+                console.error('Fetch error:', error);
             }
             setLoading(false);
         };
@@ -87,10 +93,10 @@ export default function StockDetailPage({ params }: PageProps) {
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
                         <div>
                             <div className="flex items-center gap-3 mb-2">
-                                <span className="px-3 py-1 bg-neutral-100 rounded-full text-[10px] font-bold tracking-widest text-neutral-900 uppercase">{stock.market} MARKET</span>
+                                <span className="px-3 py-1 bg-neutral-100 rounded-full text-[10px] font-bold tracking-widest text-neutral-900 uppercase">{stock.market} 시장</span>
                                 <span className="flex items-center gap-1 text-[10px] font-bold text-neutral-800">
                                     <Clock size={12} />
-                                    REAL-TIME SCRAPING DATA
+                                    실시간 스크래핑 데이터
                                 </span>
                             </div>
                             <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-1 font-serif text-neutral-900">{stock.name}</h1>
@@ -153,10 +159,17 @@ export default function StockDetailPage({ params }: PageProps) {
 
                         {/* News Section */}
                         <div className="bg-white p-8 rounded-[40px] border border-neutral-100 shadow-sm">
-                            <h3 className="text-lg font-bold flex items-center gap-2 mb-6 text-neutral-900">
-                                <Newspaper size={18} className="text-neutral-800" />
-                                관련 뉴스
-                            </h3>
+                            <div className="flex items-center justify-between mb-6">
+                                <h3 className="text-lg font-bold flex items-center gap-2 text-neutral-900">
+                                    <Newspaper size={18} className="text-neutral-800" />
+                                    관련 뉴스
+                                </h3>
+                                {newsLastScraped && (
+                                    <span className="text-[10px] font-bold text-neutral-500 bg-neutral-50 px-3 py-1 rounded-full">
+                                        마지막 업데이트: {new Date(newsLastScraped).toLocaleString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                                    </span>
+                                )}
+                            </div>
                             <div className="space-y-6">
                                 {news.map((n) => (
                                     <button

@@ -26,42 +26,35 @@ export async function searchStocks(query: string): Promise<Stock[]> {
         return [];
     }
     try {
-        // Yahoo Finance Search API 활용 (실제 종목 검색)
-        const searchUrl = `https://query1.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(lowercaseQuery)}&quotesCount=10&newsCount=0`;
+        // Naver 통합 검색 API (국내/해외/코인 등 포함)
+        const searchUrl = `https://m.stock.naver.com/front-api/search/autoComplete?query=${encodeURIComponent(lowercaseQuery)}&target=stock,index,marketindicator,coin,ipo`;
         const res = await fetch(searchUrl);
         const data = await res.json();
 
-        if (!data.quotes || data.quotes.length === 0) {
+        if (!data.result || data.result.length === 0) {
             return [];
         }
 
-        const symbols = data.quotes
-            .filter((q: any) => q.quoteType === 'EQUITY' || q.quoteType === 'ETF')
-            .map((q: any) => q.symbol);
+        // 전체 검색 결과 중 주식(stock) 카테고리 추출
+        const stockGroup = data.result.find((group: any) => group.category === 'stock');
+        if (!stockGroup || !stockGroup.items || stockGroup.items.length === 0) return [];
 
-        if (symbols.length === 0) return [];
-
-        // 실시간 시세 정보 가져오기 (Yahoo Finance Quote API)
-        const quoteUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbols.join(',')}`;
-        const quoteRes = await fetch(quoteUrl);
-        const quoteData = await quoteRes.json();
-
-        const results: Stock[] = quoteData.quoteResponse.result.map((q: any) => {
-            const isKR = q.symbol.endsWith('.KS') || q.symbol.endsWith('.KQ');
-            const isJP = q.symbol.endsWith('.T');
+        return stockGroup.items.map((item: any) => {
+            const isKR = item.nationType === 'domestic';
+            const symbol = isKR
+                ? item.repreCode + (item.stockExchangeType === 'KOSPI' ? '.KS' : '.KQ')
+                : item.repreCode; // 해외 주식은 AAPL.O 형태 그대로 사용
 
             return {
-                symbol: q.symbol,
-                name: q.longName || q.shortName || q.symbol,
-                price: isKR ? Math.floor(q.regularMarketPrice) : Number(q.regularMarketPrice.toFixed(2)),
-                change: isKR ? Math.floor(q.regularMarketChange) : Number(q.regularMarketChange.toFixed(2)),
-                changePercent: Number(q.regularMarketChangePercent.toFixed(2)),
-                market: isKR ? (q.symbol.endsWith('.KS') ? 'KOSPI' : 'KOSDAQ') : isJP ? 'JP' : 'US',
-                currency: q.currency
+                symbol: symbol,
+                name: item.nm,
+                price: parseFloat(item.nv.toString().replace(/,/g, '')),
+                change: parseFloat(item.cv.toString().replace(/,/g, '')),
+                changePercent: parseFloat(item.cr.toString()),
+                market: isKR ? item.stockExchangeType : item.nationType.toUpperCase(),
+                currency: isKR ? 'KRW' : (item.currencyType || 'USD')
             };
         });
-
-        return results;
     } catch (error) {
         console.error('Search API Error:', error);
         return [];
@@ -70,86 +63,81 @@ export async function searchStocks(query: string): Promise<Stock[]> {
 
 export async function getStockBySymbol(symbol: string): Promise<Stock | undefined> {
     try {
-        // 1. 한국 주식의 경우 네이버 API 우선 시도 (가장 정확)
-        if (symbol.endsWith('.KS') || symbol.endsWith('.KQ')) {
-            const code = symbol.split('.')[0];
-            try {
-                const naverUrl = `https://polling.finance.naver.com/api/realtime/domestic/stock/${code}`;
-                const res = await fetch(naverUrl, { cache: 'no-store' });
-                const data = await res.json();
+        const isKR = symbol.endsWith('.KS') || symbol.endsWith('.KQ');
+        const code = isKR ? symbol.split('.')[0] : symbol;
 
-                if (data.result && data.result.areas && data.result.areas.length > 0) {
-                    const stockInfo = data.result.areas[0].datas[0];
-                    return {
-                        symbol: symbol,
-                        name: stockInfo.nm,
-                        price: parseInt(stockInfo.nv.toString()),
-                        change: parseInt(stockInfo.cv.toString()),
-                        changePercent: parseFloat(stockInfo.cr.toString()),
-                        market: symbol.endsWith('.KS') ? 'KOSPI' : 'KOSDAQ',
-                        currency: 'KRW'
-                    };
-                }
-            } catch (e) {
-                console.warn('Naver API failed, falling back to Yahoo:', e);
+        if (isKR) {
+            // 국내 주식 실시간 시세
+            const naverUrl = `https://polling.finance.naver.com/api/realtime/domestic/stock/${code}`;
+            const res = await fetch(naverUrl, { cache: 'no-store' });
+            const data = await res.json();
+
+            if (data.result && data.result.areas && data.result.areas.length > 0) {
+                const stockInfo = data.result.areas[0].datas[0];
+                return {
+                    symbol: symbol,
+                    name: stockInfo.nm,
+                    price: parseInt(stockInfo.nv.toString()),
+                    change: parseInt(stockInfo.cv.toString()),
+                    changePercent: parseFloat(stockInfo.cr.toString()),
+                    market: symbol.endsWith('.KS') ? 'KOSPI' : 'KOSDAQ',
+                    currency: 'KRW'
+                };
+            }
+        } else {
+            // 해외 주식 실시간 시세 (예: AAPL.O)
+            const naverUrl = `https://polling.finance.naver.com/api/realtime/worldstock/stock/${code}`;
+            const res = await fetch(naverUrl, { cache: 'no-store' });
+            const data = await res.json();
+
+            if (data.result && data.result.length > 0) {
+                const stockInfo = data.result[0];
+                return {
+                    symbol: symbol,
+                    name: stockInfo.nm,
+                    price: parseFloat(stockInfo.nv.toString()),
+                    change: parseFloat(stockInfo.cv.toString()),
+                    changePercent: parseFloat(stockInfo.cr.toString()),
+                    market: 'US', // 기본적으로 US로 매핑 (필요시 상세 거래소 정보 활용)
+                    currency: stockInfo.cur || 'USD'
+                };
             }
         }
-
-        // 2. 해외 주식 또는 네이버 실패 시 Yahoo Finance Quote API 사용
-        const quoteUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbol}`;
-        const res = await fetch(quoteUrl, { cache: 'no-store' });
-        const data = await res.json();
-
-        if (!data.quoteResponse.result || data.quoteResponse.result.length === 0) {
-            return undefined;
-        }
-
-        const q = data.quoteResponse.result[0];
-        const isKR = q.symbol.endsWith('.KS') || q.symbol.endsWith('.KQ');
-        const isJP = q.symbol.endsWith('.T');
-
-        return {
-            symbol: q.symbol,
-            name: q.longName || q.shortName || q.symbol,
-            price: isKR ? Math.floor(q.regularMarketPrice) : Number(q.regularMarketPrice.toFixed(2)),
-            change: isKR ? Math.floor(q.regularMarketChange) : Number(q.regularMarketChange.toFixed(2)),
-            changePercent: Number(q.regularMarketChangePercent.toFixed(2)),
-            market: isKR ? (q.symbol.endsWith('.KS') ? 'KOSPI' : 'KOSDAQ') : isJP ? 'JP' : 'US',
-            currency: q.currency
-        };
+        return undefined;
     } catch (error) {
         console.error('GetStockBySymbol API Error:', error);
         return undefined;
     }
 }
 
-
 export async function getStockChartData(symbol: string, range: string = '1d'): Promise<ChartData[]> {
     try {
-        let interval = '15m';
-        if (range === '1d') interval = '5m';
-        else if (range === '5d') interval = '30m';
-        else if (range === '1mo') interval = '1d';
-        else if (range === '1y') interval = '1wk';
+        const isKR = symbol.endsWith('.KS') || symbol.endsWith('.KQ');
+        const code = isKR ? symbol.split('.')[0] : symbol;
 
-        const chartUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?range=${range}&interval=${interval}`;
-        const res = await fetch(chartUrl);
+        // periodType 매핑
+        let periodType = 'day';
+        if (range === '1d') periodType = 'day';
+        else if (range === '5d') periodType = 'day'; // 네이버는 보통 day로 여러 개 가져옴
+        else if (range === '1mo') periodType = 'month';
+        else if (range === '1y') periodType = 'year';
+
+        const chartUrl = isKR
+            ? `https://api.stock.naver.com/chart/domestic/item/${code}?periodType=${periodType}`
+            : `https://api.stock.naver.com/chart/foreign/item/${code}?periodType=${periodType}`;
+
+        const res = await fetch(chartUrl, { cache: 'no-store' });
         const data = await res.json();
 
-        if (!data.chart || !data.chart.result || data.chart.result.length === 0) return [];
+        // 네이버 차트 데이터 파싱 로직 (간소화)
+        if (!data.priceInfos || !Array.isArray(data.priceInfos)) return [];
 
-        const result = data.chart.result[0];
-        const timestamps = result.timestamp;
-        const prices = result.indicators.quote[0].close;
-
-        if (!timestamps || !prices) return [];
-
-        return timestamps.map((ts: number, i: number) => ({
-            time: range === '1d' || range === '5d'
-                ? new Date(ts * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                : new Date(ts * 1000).toLocaleDateString([], { month: '2-digit', day: '2-digit' }),
-            price: prices[i] ? Number(prices[i].toFixed(2)) : null
-        })).filter((d: any) => d.price !== null) as ChartData[];
+        return data.priceInfos.map((item: any) => ({
+            time: item.localDateTime.substring(4, 8) === '0000'
+                ? item.localDateTime.substring(0, 4)
+                : item.localDateTime.substring(4, 6) + '/' + item.localDateTime.substring(6, 8),
+            price: parseFloat(item.closePrice.toString().replace(/,/g, ''))
+        }));
     } catch (error) {
         console.error('GetStockChartData API Error:', error);
         return [];
@@ -166,50 +154,29 @@ export interface StockNews {
 }
 
 export async function getStockNews(symbol: string): Promise<StockNews[]> {
-    // 실시간 뉴스 스크래핑 시뮬레이션
-    return [
-        {
-            id: '1',
-            title: `${symbol} 주가, 향후 성장성에 대한 투자자들의 긍정적 전망 잇따라`,
-            source: 'CRESSETS News',
-            time: '2시간 전',
-            url: '#',
-            content: `투자자들 사이에서 ${symbol}의 중장기 성장 잠재력에 대한 긍정적인 평가가 확산되고 있습니다. 최근 발표된 시장 데이터에 따르면, 해당 분야의 수요가 예상을 상회하고 있으며 ${symbol}은(는) 차별화된 전략으로 시장 점유율을 견고히 하고 있습니다. 전문가들은 거시 경제의 불확실성 속에서도 ${symbol}의 탄탄한 재무 구조가 리스크를 상쇄할 것으로 내다봤습니다.`
-        },
-        {
-            id: '2',
-            title: `분석가들, ${symbol}의 4분기 실적 발표에 주목`,
-            source: 'Insight Hub',
-            time: '5시간 전',
-            url: '#',
-            content: `금융 분석가들이 ${symbol}의 다가오는 4분기 실적 발표를 예의주시하고 있습니다. 이번 실적 발표는 향후 1년간의 주가 방향성을 결정짓는 중요한 분기점이 될 것으로 보입니다. 특히 수익성 개선 여부와 신규 사업 부문의 성장세가 핵심 관전 포인트로 꼽힙니다. 분석가들은 보수적인 접근을 유지하면서도 기술적 반등의 가능성을 배제하지 않고 있습니다.`
-        },
-        {
-            id: '3',
-            title: `${symbol} 관련 주요 시장 변동 사항 및 대응 전략`,
-            source: 'Beacon Finance',
-            time: '8시간 전',
-            url: '#',
-            content: `최근 시장 변동성이 확대됨에 따라 ${symbol} 투자자들을 위한 맞춤형 대응 전략이 요구되고 있습니다. 글로벌 공급망의 변화와 금리 인상 기조가 주가에 하방 압력을 가하고 있으나, ${symbol}의 강력한 브랜드 파워와 충성도 높은 고객층은 여전한 강점으로 작용하고 있습니다. 단기적 변동성에 일희일비하기보다 핵심 본질 가치에 집중하는 장기적 관점의 투자가 유효할 것으로 분석됩니다.`
-        }
-    ];
+    // 실시간 뉴스 스크래핑 시뮬레이션 (이미 Action에서 구현됨)
+    return [];
 }
 
 export async function getStockStats(symbol: string) {
     try {
-        const quoteUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbol}`;
-        const res = await fetch(quoteUrl);
+        const isKR = symbol.endsWith('.KS') || symbol.endsWith('.KQ');
+        const code = isKR ? symbol.split('.')[0] : symbol;
+
+        const basicUrl = isKR
+            ? `https://m.stock.naver.com/api/stock/${code}/basic`
+            : `https://api.stock.naver.com/stock/${code}/basic`;
+
+        const res = await fetch(basicUrl, { cache: 'no-store' });
         const data = await res.json();
 
-        if (!data.quoteResponse.result || data.quoteResponse.result.length === 0) return null;
-
-        const q = data.quoteResponse.result[0];
+        const info = isKR ? data : data; // 해외/국내 구조 대동소이
 
         return {
-            volume: q.regularMarketVolume?.toLocaleString() || '---',
-            marketCap: q.marketCap ? (q.marketCap / 1e12).toFixed(2) + 'T' : '---',
-            high52w: q.fiftyTwoWeekHigh?.toFixed(2) || '---',
-            low52w: q.fiftyTwoWeekLow?.toFixed(2) || '---'
+            volume: info.accumulatedTradingVolume?.toLocaleString() || '---',
+            marketCap: info.marketValue ? (parseFloat(info.marketValue.toString().replace(/,/g, '')) / 1e8).toFixed(0) + '억' : '---',
+            high52w: info.highPriceOf52Weeks?.toLocaleString() || '---',
+            low52w: info.lowPriceOf52Weeks?.toLocaleString() || '---'
         };
     } catch (error) {
         console.error('GetStockStats API Error:', error);
