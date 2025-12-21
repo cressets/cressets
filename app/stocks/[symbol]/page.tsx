@@ -4,7 +4,8 @@ import { useState, useEffect, use } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, TrendingUp, TrendingDown, Info, Globe2, Clock, Newspaper, X } from 'lucide-react';
 import { Stock, ChartData } from '@/types/stock';
-import { getStockBySymbol, getStockChartData, getStockStats, StockNews } from '@/lib/stocks';
+import { StockNews } from '@/lib/stocks';
+import { getStockBySymbolAction, getStockChartDataAction, getStockStatsAction } from '@/app/actions/stocks';
 import { getStockNewsAction } from '@/app/actions/stock-news';
 import StockChart from '@/components/StockChart';
 import StockBoard from '@/components/StockBoard';
@@ -32,9 +33,9 @@ export default function StockDetailPage({ params }: PageProps) {
         const fetchInitialData = async () => {
             try {
                 const [stockData, newsResponse, statsData] = await Promise.all([
-                    getStockBySymbol(symbol),
+                    getStockBySymbolAction(symbol),
                     getStockNewsAction(symbol),
-                    getStockStats(symbol)
+                    getStockStatsAction(symbol)
                 ]);
 
                 if (stockData) {
@@ -54,7 +55,7 @@ export default function StockDetailPage({ params }: PageProps) {
     useEffect(() => {
         const fetchChart = async () => {
             setChartLoading(true);
-            const chart = await getStockChartData(symbol, timeframe);
+            const chart = await getStockChartDataAction(symbol, timeframe);
             setChartData(chart);
             setChartLoading(false);
         };

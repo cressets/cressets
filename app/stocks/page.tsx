@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Search, TrendingUp, TrendingDown, Globe, SearchIcon } from 'lucide-react';
 import { Stock, Market } from '@/types/stock';
-import { searchStocks } from '@/lib/stocks';
+import { searchStocksAction } from '@/app/actions/stocks';
 
 export default function StocksPage() {
     const [query, setQuery] = useState('');
@@ -13,7 +13,7 @@ export default function StocksPage() {
 
     useEffect(() => {
         const fetchStocks = async () => {
-            const results = await searchStocks(query);
+            const results = await searchStocksAction(query);
             if (marketFilter === 'ALL') {
                 setStocks(results);
             } else {
