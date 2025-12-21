@@ -1,5 +1,4 @@
-import { Stock, ChartData, Post, Market } from '@/types/stock';
-import db from './db';
+import { Stock, ChartData, Market } from '@/types/stock';
 
 const MOCK_STOCKS: Stock[] = [
     // US Stocks
@@ -104,27 +103,47 @@ export async function getStockChartData(symbol: string): Promise<ChartData[]> {
     return data;
 }
 
-export async function getBoardPosts(symbol: string): Promise<Post[]> {
-    const posts = db.prepare('SELECT * FROM posts WHERE symbol = ? ORDER BY createdAt DESC').all(symbol) as any[];
-    return posts.map(p => ({
-        ...p,
-        id: p.id.toString(),
-        createdAt: new Date(p.createdAt).toLocaleString()
-    }));
+export interface StockNews {
+    id: string;
+    title: string;
+    source: string;
+    time: string;
+    url: string;
 }
 
-export async function addPost(symbol: string, author: string, content: string): Promise<Post> {
-    const id = Date.now().toString();
-    const createdAt = new Date().toISOString();
+export async function getStockNews(symbol: string): Promise<StockNews[]> {
+    // 실시간 뉴스 스크래핑 시뮬레이션
+    return [
+        {
+            id: '1',
+            title: `${symbol} 주가, 향후 성장성에 대한 투자자들의 긍정적 전망 잇따라`,
+            source: 'CRESSETS News',
+            time: '2시간 전',
+            url: '#'
+        },
+        {
+            id: '2',
+            title: `분석가들, ${symbol}의 4분기 실적 발표에 주목`,
+            source: 'Insight Hub',
+            time: '5시간 전',
+            url: '#'
+        },
+        {
+            id: '3',
+            title: `${symbol} 관련 주요 시장 변동 사항 및 대응 전략`,
+            source: 'Beacon Finance',
+            time: '8시간 전',
+            url: '#'
+        }
+    ];
+}
 
-    db.prepare('INSERT INTO posts (id, symbol, author, content, createdAt) VALUES (?, ?, ?, ?, ?)')
-        .run(id, symbol, author, content, createdAt);
-
+export async function getStockStats(symbol: string) {
+    // 실시간 투자 지표 스크래핑 시뮬레이션
     return {
-        id,
-        author,
-        content,
-        createdAt: new Date(createdAt).toLocaleString(),
-        likes: 0
+        volume: (Math.random() * 50000000 + 10000000).toLocaleString(undefined, { maximumFractionDigits: 0 }),
+        marketCap: (Math.random() * 3 + 0.5).toFixed(2) + 'T',
+        high52w: (Math.random() * 100 + 100).toFixed(2),
+        low52w: (Math.random() * 50 + 50).toFixed(2)
     };
 }

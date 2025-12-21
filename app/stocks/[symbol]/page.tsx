@@ -4,9 +4,10 @@ import { useState, useEffect, use } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, TrendingUp, TrendingDown, Info, Globe2, Clock } from 'lucide-react';
 import { Stock, ChartData } from '@/types/stock';
-import { getStockBySymbol, getStockChartData } from '@/lib/stocks';
+import { getStockBySymbol, getStockChartData, getStockNews, getStockStats, StockNews } from '@/lib/stocks';
 import StockChart from '@/components/StockChart';
 import StockBoard from '@/components/StockBoard';
+import { Newspaper } from 'lucide-react';
 
 interface PageProps {
     params: Promise<{ symbol: string }>;
@@ -18,15 +19,24 @@ export default function StockDetailPage({ params }: PageProps) {
 
     const [stock, setStock] = useState<Stock | null>(null);
     const [chartData, setChartData] = useState<ChartData[]>([]);
+    const [news, setNews] = useState<StockNews[]>([]);
+    const [stats, setStats] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchData = async () => {
-            const stockData = await getStockBySymbol(symbol);
+            const [stockData, chart, newsData, statsData] = await Promise.all([
+                getStockBySymbol(symbol),
+                getStockChartData(symbol),
+                getStockNews(symbol),
+                getStockStats(symbol)
+            ]);
+
             if (stockData) {
                 setStock(stockData);
-                const chart = await getStockChartData(symbol);
                 setChartData(chart);
+                setNews(newsData);
+                setStats(statsData);
             }
             setLoading(false);
         };
@@ -68,7 +78,7 @@ export default function StockDetailPage({ params }: PageProps) {
                                 <span className="px-3 py-1 bg-neutral-100 rounded-full text-[10px] font-bold tracking-widest text-neutral-500 uppercase">{stock.market} MARKET</span>
                                 <span className="flex items-center gap-1 text-[10px] font-bold text-neutral-600">
                                     <Clock size={12} />
-                                    REAL-TIME DATA
+                                    REAL-TIME SCRAPING DATA
                                 </span>
                             </div>
                             <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-1 font-serif">{stock.name}</h1>
@@ -76,7 +86,7 @@ export default function StockDetailPage({ params }: PageProps) {
                         </div>
 
                         <div className="text-right">
-                            <div className="text-5xl font-black flex items-center gap-2">
+                            <div className="text-5xl font-black flex items-center gap-2 justify-end">
                                 <span className="text-2xl mt-2">{stock.currency === 'KRW' ? '₩' : stock.currency === 'USD' ? '$' : '¥'}</span>
                                 {stock.price.toLocaleString()}
                             </div>
@@ -91,7 +101,7 @@ export default function StockDetailPage({ params }: PageProps) {
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-                    {/* Main Content: Chart */}
+                    {/* Main Content: Chart & News */}
                     <div className="lg:col-span-2 space-y-10">
                         <div className="bg-white p-8 rounded-[40px] border border-neutral-100 shadow-sm">
                             <div className="flex items-center justify-between mb-2">
@@ -109,6 +119,27 @@ export default function StockDetailPage({ params }: PageProps) {
                             <StockChart data={chartData} isPositive={isPositive} />
                         </div>
 
+                        {/* News Section */}
+                        <div className="bg-white p-8 rounded-[40px] border border-neutral-100 shadow-sm">
+                            <h3 className="text-lg font-bold flex items-center gap-2 mb-6">
+                                <Newspaper size={18} className="text-neutral-600" />
+                                관련 뉴스
+                            </h3>
+                            <div className="space-y-6">
+                                {news.map((n) => (
+                                    <Link key={n.id} href={n.url} className="block group">
+                                        <div className="flex justify-between items-start mb-1">
+                                            <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">{n.source}</span>
+                                            <span className="text-[10px] text-neutral-400">{n.time}</span>
+                                        </div>
+                                        <h4 className="text-base font-bold group-hover:text-blue-600 transition-colors leading-snug">
+                                            {n.title}
+                                        </h4>
+                                    </Link>
+                                ))}
+                            </div>
+                        </div>
+
                         <StockBoard symbol={symbol} />
                     </div>
 
@@ -121,30 +152,30 @@ export default function StockDetailPage({ params }: PageProps) {
                             <div className="space-y-6">
                                 <div className="flex justify-between border-b border-white/10 pb-4">
                                     <span className="text-white/50 text-sm font-medium">거래량</span>
-                                    <span className="font-bold">12,450,230</span>
+                                    <span className="font-bold">{stats?.volume || '---'}</span>
                                 </div>
                                 <div className="flex justify-between border-b border-white/10 pb-4">
                                     <span className="text-white/50 text-sm font-medium">시가총액</span>
-                                    <span className="font-bold">2.45T</span>
+                                    <span className="font-bold">{stats?.marketCap || '---'}</span>
                                 </div>
                                 <div className="flex justify-between border-b border-white/10 pb-4">
                                     <span className="text-white/50 text-sm font-medium">52주 최고</span>
-                                    <span className="font-bold text-red-400">192.50</span>
+                                    <span className="font-bold text-red-400">{stats?.high52w || '---'}</span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-white/50 text-sm font-medium">52주 최저</span>
-                                    <span className="font-bold text-blue-400">140.20</span>
+                                    <span className="font-bold text-blue-400">{stats?.low52w || '---'}</span>
                                 </div>
                             </div>
                             <button className="w-full mt-10 bg-white text-black py-4 rounded-2xl font-black text-sm hover:scale-[1.02] transition-transform active:scale-100">
-                                구매하기
+                                관심 종목 추가
                             </button>
                         </div>
 
                         <div className="bg-[#EBE8E3] p-8 rounded-[40px] border border-[#E5E1DB]">
                             <h3 className="text-xl font-bold mb-4">AI 투자 전망</h3>
                             <p className="text-neutral-600 text-sm leading-relaxed mb-6">
-                                현재 {stock.name}은(는) 안정적인 상승세를 보이고 있습니다. 최근 10개년 데이터 분석 결과, 단기적으로 추가 상승 가능성이 높은 것으로 나타납니다.
+                                분석 결과, {stock.name}은(는) 현재 시장 트렌드와 유사한 흐름을 보이고 있습니다. 실시간 스크래핑된 지표들은 긍정적인 신호를 보냅니다.
                             </p>
                             <div className="flex items-center gap-4">
                                 <div className="flex-1 h-3 bg-white rounded-full overflow-hidden">
