@@ -42,19 +42,7 @@ jobs:
           cd .next/standalone
           tar -czf ../../artifact.tar.gz .
 
-      # 6. 서버에서 이전 파일 정리 (용량 절약)
-      - name: Clean previous build on server
-        uses: appleboy/ssh-action@v1
-        with:
-          host: cressets.mooo.com
-          username: ubuntu
-          key: ${{ secrets.SSH_KEY }}
-          port: 22
-          script: |
-            cd /var/www/cressets
-            rm -rf .next public server.js node_modules artifact.tar.gz
-
-      # 7. SCP로 압축 파일 전송
+      # 6. SCP로 압축 파일 전송 (이전 파일 삭제 없이 바로 전송)
       - name: Upload build artifacts
         uses: appleboy/scp-action@v1
         with:
@@ -65,17 +53,17 @@ jobs:
           source: artifact.tar.gz
           target: /var/www/cressets
 
-      # 8. 서버에서 압축 해제 및 PM2 재시작 (의존성 설치 생략)
-      - name: Extract artifacts & restart PM2
+      # 7. 단 한 번의 SSH 연결로 압축 해제, 구버전 정리, PM2 재시작 처리
+      - name: Extract artifacts & Clean & Restart
         uses: appleboy/ssh-action@v1
         with:
           host: cressets.mooo.com
           username: ubuntu
           key: ${{ secrets.SSH_KEY }}
           port: 22
-          command_timeout: 10m
+          command_timeout: 15m
           script: |
-            # 환경 변수 로드
+            # 1. 환경 변수 로드
             [ -s "$HOME/.profile" ] && source "$HOME/.profile"
             [ -s "$HOME/.bashrc" ] && source "$HOME/.bashrc"
             export NVM_DIR="$HOME/.nvm"
@@ -83,11 +71,17 @@ jobs:
 
             cd /var/www/cressets
 
-            # 압축 해제 및 파일 삭제
+            # 2. 기존 실행 파일들을 임시 폴더로 이동 (삭제보다 빠름)
+            mkdir -p old_build
+            mv .next public server.js old_build/ 2>/dev/null || true
+
+            # 3. 새 압축 파일 해제
             tar -xzf artifact.tar.gz
             rm artifact.tar.gz
 
-            # PM2 재시작 (Standalone 서버 실행)
-            # PORT 환경변수를 지정하여 3000포트로 실행
+            # 4. PM2 재시작 (Standalone 서버 실행)
             pm2 describe cressets > /dev/null 2>&1 && pm2 reload cressets || PORT=3000 pm2 start server.js --name "cressets"
             pm2 save
+
+            # 5. 구버전 파일 백그라운드 삭제 (I/O 부하 분산)
+            rm -rf old_build &
