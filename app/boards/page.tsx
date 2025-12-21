@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -37,8 +37,8 @@ export default function BoardsHubPage() {
             <header className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                     <div>
-                        <h1 className="text-4xl font-black tracking-tight mb-2">토론 섹션</h1>
-                        <p className="text-neutral-500 text-lg">실시간으로 달궈진 투자자들의 통찰력을 확인하세요.</p>
+                        <h1 className="text-4xl font-black tracking-tight mb-2 text-neutral-900">토론 섹션</h1>
+                        <p className="text-neutral-800 text-lg font-medium">실시간으로 달궈진 투자자들의 통찰력을 확인하세요.</p>
                     </div>
                 </div>
             </header>
@@ -57,12 +57,12 @@ export default function BoardsHubPage() {
                                 <div key={post.id} className="bg-white p-6 rounded-3xl border border-neutral-100 shadow-sm hover:shadow-md transition-all">
                                     <div className="flex justify-between items-start mb-4">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center text-neutral-500 font-bold">
+                                            <div className="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center text-neutral-800 font-bold">
                                                 <User size={18} />
                                             </div>
                                             <div>
-                                                <div className="font-bold text-sm">{post.author}</div>
-                                                <div className="text-xs text-neutral-400">{post.createdAt}</div>
+                                                <div className="font-bold text-sm text-neutral-900">{post.author}</div>
+                                                <div className="text-xs text-neutral-600 font-bold">{post.createdAt}</div>
                                             </div>
                                         </div>
                                         <Link
@@ -72,7 +72,7 @@ export default function BoardsHubPage() {
                                             {post.symbol}
                                         </Link>
                                     </div>
-                                    <p className="text-neutral-700 leading-relaxed">
+                                    <p className="text-neutral-900 leading-relaxed font-medium">
                                         {post.content}
                                     </p>
                                 </div>

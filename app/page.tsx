@@ -21,7 +21,7 @@ export default function Home() {
             <span className="text-neutral-400">Financial Future.</span>
           </h1>
 
-          <p className="text-xl md:text-2xl text-neutral-500 max-w-2xl leading-relaxed animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-200">
+          <p className="text-xl md:text-2xl text-neutral-800 max-w-2xl leading-relaxed animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-200">
             Cressets은 데이터 기반의 통찰력으로 복잡한 시장을 밝히는 등불입니다. 실시간 검색, 집단 지성, 그리고 AI 분석을 한 곳에서 경험하세요.
           </p>
 
@@ -66,7 +66,7 @@ export default function Home() {
             <h2 className="text-4xl md:text-5xl font-black tracking-tight leading-tight">
               투명함이 만드는 <br />확신(Confidence).
             </h2>
-            <p className="text-lg text-neutral-500 leading-relaxed">
+            <p className="text-lg text-neutral-900 leading-relaxed">
               우리는 숫자가 아닌 맥락을 제공합니다. 전 세계의 공개 시장 데이터를 스크래핑하고 가공하여 투자자가 가려워하는 지점을 정확히 짚어냅니다.
             </p>
             <div className="space-y-4 pt-4">
@@ -115,7 +115,7 @@ export default function Home() {
                 {feature.title}
                 <ArrowRight className="opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all" size={20} />
               </h3>
-              <p className="text-neutral-500 leading-relaxed font-medium">
+              <p className="text-neutral-900 leading-relaxed font-medium">
                 {feature.desc}
               </p>
             </Link>

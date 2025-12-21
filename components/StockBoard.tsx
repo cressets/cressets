@@ -78,23 +78,23 @@ export default function StockBoard({ symbol }: StockBoardProps) {
                             <div className="flex justify-between items-start mb-2">
                                 <div className="flex items-center gap-2">
                                     <div className="w-8 h-8 rounded-full bg-neutral-100 flex items-center justify-center">
-                                        <User size={14} className="text-neutral-500" />
+                                        <User size={14} className="text-neutral-800" />
                                     </div>
-                                    <span className="font-bold text-sm">{post.author}</span>
-                                    <span className="text-xs text-neutral-400">{post.createdAt}</span>
+                                    <span className="font-bold text-sm text-neutral-900">{post.author}</span>
+                                    <span className="text-xs text-neutral-600 font-medium">{post.createdAt}</span>
                                 </div>
-                                <button className="flex items-center gap-1.5 text-xs font-semibold text-neutral-400 hover:text-red-500 transition-colors">
+                                <button className="flex items-center gap-1.5 text-xs font-semibold text-neutral-600 hover:text-red-500 transition-colors">
                                     <ThumbsUp size={14} />
                                     {post.likes}
                                 </button>
                             </div>
-                            <p className="text-neutral-700 leading-relaxed ml-10">
+                            <p className="text-neutral-900 leading-relaxed ml-10 font-medium">
                                 {post.content}
                             </p>
                         </div>
                     ))
                 ) : (
-                    <div className="py-10 text-center text-neutral-400 italic">
+                    <div className="py-10 text-center text-neutral-800 italic font-medium">
                         아직 작성된 의견이 없습니다. 첫 번째 의견을 남겨보세요!
                     </div>
                 )}
