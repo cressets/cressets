@@ -31,69 +31,87 @@ const ALL_TOP_STOCKS = [...TOP_STOCKS_KR, ...TOP_STOCKS_US];
 export async function searchStocks(query: string): Promise<Stock[]> {
     const lowercaseQuery = query.toLowerCase().trim();
 
-    // 초기 상태: 시가총액 상위 종목 스크래핑 데이터 노출 (시뮬레이션)
+    // 초기 상태: 시가총액 상위 종목 노출
     if (!lowercaseQuery) return ALL_TOP_STOCKS;
 
-    const filtered = ALL_TOP_STOCKS.filter(stock =>
-        stock.symbol.toLowerCase().includes(lowercaseQuery) ||
-        stock.name.toLowerCase().includes(lowercaseQuery)
-    );
+    try {
+        // Yahoo Finance Search API 활용 (실제 종목 검색)
+        const searchUrl = `https://query1.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(lowercaseQuery)}&quotesCount=10&newsCount=0`;
+        const res = await fetch(searchUrl);
+        const data = await res.json();
 
-    // 검색 결과가 적은 경우, 실시간 스크래핑 엔진 가동 시뮬레이션
-    if (filtered.length < 5 && lowercaseQuery.length >= 1) {
-        const symbol = lowercaseQuery.toUpperCase();
-        const isKorean = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(lowercaseQuery) || /^[0-9]+$/.test(symbol);
-        const isJapanese = /^[0-9]{4}$/.test(symbol);
-
-        const market: Market = isKorean ? 'KR' : isJapanese ? 'JP' : 'US';
-        const currency = market === 'US' ? 'USD' : market === 'KR' ? 'KRW' : 'JPY';
-        const basePrice = market === 'KR' ? 50000 : market === 'JP' ? 3000 : 150;
-
-        // 이미 결과에 포함되지 않은 경우에만 새로운 탐색 결과 추가
-        if (!filtered.some(s => s.symbol === symbol)) {
-            // "관련주" 대신 더 명확한 명칭 부여
-            let name = `${symbol} Group`;
-            if (isKorean) {
-                name = lowercaseQuery.length <= 3 ? `${lowercaseQuery}산업` : `${lowercaseQuery}홀딩스`;
-            }
-
-            filtered.push({
-                symbol: isKorean && !/^[0-9]+$/.test(symbol) ? `K${Math.floor(Math.random() * 900000 + 100000)}` : symbol,
-                name: name,
-                price: basePrice + (Math.random() * basePrice * 0.1),
-                change: (Math.random() * 10 - 5),
-                changePercent: (Math.random() * 4 - 2),
-                market: market,
-                currency: currency
-            });
+        if (!data.quotes || data.quotes.length === 0) {
+            // 결과가 없을 경우 기존 필터링 결과 반환
+            return ALL_TOP_STOCKS.filter(stock =>
+                stock.symbol.toLowerCase().includes(lowercaseQuery) ||
+                stock.name.toLowerCase().includes(lowercaseQuery)
+            );
         }
-    }
 
-    return filtered;
+        const symbols = data.quotes
+            .filter((q: any) => q.quoteType === 'EQUITY' || q.quoteType === 'ETF')
+            .map((q: any) => q.symbol);
+
+        if (symbols.length === 0) return [];
+
+        // 실시간 시세 정보 가져오기 (Yahoo Finance Quote API)
+        const quoteUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbols.join(',')}`;
+        const quoteRes = await fetch(quoteUrl);
+        const quoteData = await quoteRes.json();
+
+        const results: Stock[] = quoteData.quoteResponse.result.map((q: any) => {
+            const isKR = q.symbol.endsWith('.KS') || q.symbol.endsWith('.KQ');
+            const isJP = q.symbol.endsWith('.T');
+
+            return {
+                symbol: q.symbol,
+                name: q.longName || q.shortName || q.symbol,
+                price: q.regularMarketPrice,
+                change: q.regularMarketChange,
+                changePercent: q.regularMarketChangePercent,
+                market: isKR ? 'KR' : isJP ? 'JP' : 'US',
+                currency: q.currency
+            };
+        });
+
+        return results;
+    } catch (error) {
+        console.error('Search API Error:', error);
+        // 에러 시 기존 목업 필터링이라도 수행
+        return ALL_TOP_STOCKS.filter(stock =>
+            stock.symbol.toLowerCase().includes(lowercaseQuery) ||
+            stock.name.toLowerCase().includes(lowercaseQuery)
+        );
+    }
 }
 
 export async function getStockBySymbol(symbol: string): Promise<Stock | undefined> {
-    const lowercaseSymbol = symbol.toLowerCase();
-    const existing = ALL_TOP_STOCKS.find(s => s.symbol.toLowerCase() === lowercaseSymbol);
+    try {
+        const quoteUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbol}`;
+        const res = await fetch(quoteUrl);
+        const data = await res.json();
 
-    if (existing) return existing;
+        if (!data.quoteResponse.result || data.quoteResponse.result.length === 0) {
+            return ALL_TOP_STOCKS.find(s => s.symbol.toLowerCase() === symbol.toLowerCase());
+        }
 
-    // 없는 종목인 경우 실시간 생성 (상세 페이지 접근 시)
-    const isKorean = /^[0-9]+$/.test(symbol) || symbol.startsWith('K');
-    const isJapanese = /^[0-9]{4}$/.test(symbol);
-    const market: Market = isKorean ? 'KR' : isJapanese ? 'JP' : 'US';
-    const currency = market === 'US' ? 'USD' : market === 'KR' ? 'KRW' : 'JPY';
-    const basePrice = market === 'KR' ? 50000 : market === 'JP' ? 3000 : 150;
+        const q = data.quoteResponse.result[0];
+        const isKR = q.symbol.endsWith('.KS') || q.symbol.endsWith('.KQ');
+        const isJP = q.symbol.endsWith('.T');
 
-    return {
-        symbol: symbol.toUpperCase(),
-        name: `${symbol.toUpperCase()} 분석 기업`,
-        price: basePrice + (Math.random() * basePrice * 0.1),
-        change: (Math.random() * 10 - 5),
-        changePercent: (Math.random() * 4 - 2),
-        market: market,
-        currency: currency
-    };
+        return {
+            symbol: q.symbol,
+            name: q.longName || q.shortName || q.symbol,
+            price: q.regularMarketPrice,
+            change: q.regularMarketChange,
+            changePercent: q.regularMarketChangePercent,
+            market: isKR ? 'KR' : isJP ? 'JP' : 'US',
+            currency: q.currency
+        };
+    } catch (error) {
+        console.error('GetStockBySymbol API Error:', error);
+        return ALL_TOP_STOCKS.find(s => s.symbol.toLowerCase() === symbol.toLowerCase());
+    }
 }
 
 export async function getStockChartData(symbol: string): Promise<ChartData[]> {
@@ -161,11 +179,23 @@ export async function getStockNews(symbol: string): Promise<StockNews[]> {
 }
 
 export async function getStockStats(symbol: string) {
-    // 실시간 투자 지표 스크래핑 시뮬레이션
-    return {
-        volume: (Math.random() * 50000000 + 10000000).toLocaleString(undefined, { maximumFractionDigits: 0 }),
-        marketCap: (Math.random() * 3 + 0.5).toFixed(2) + 'T',
-        high52w: (Math.random() * 100 + 100).toFixed(2),
-        low52w: (Math.random() * 50 + 50).toFixed(2)
-    };
+    try {
+        const quoteUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbol}`;
+        const res = await fetch(quoteUrl);
+        const data = await res.json();
+
+        if (!data.quoteResponse.result || data.quoteResponse.result.length === 0) return null;
+
+        const q = data.quoteResponse.result[0];
+
+        return {
+            volume: q.regularMarketVolume?.toLocaleString() || '---',
+            marketCap: q.marketCap ? (q.marketCap / 1e12).toFixed(2) + 'T' : '---',
+            high52w: q.fiftyTwoWeekHigh?.toFixed(2) || '---',
+            low52w: q.fiftyTwoWeekLow?.toFixed(2) || '---'
+        };
+    } catch (error) {
+        console.error('GetStockStats API Error:', error);
+        return null;
+    }
 }

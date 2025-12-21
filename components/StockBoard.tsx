@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Post } from '@/types/stock';
-import { getPostsAction, addPostAction } from '@/app/actions/board';
+import { getPostsAction, addPostAction, likePostAction } from '@/app/actions/board';
 import { MessageSquare, User, Send, ThumbsUp } from 'lucide-react';
 
 interface StockBoardProps {
@@ -14,11 +14,12 @@ export default function StockBoard({ symbol }: StockBoardProps) {
     const [newPost, setNewPost] = useState('');
     const [author, setAuthor] = useState('');
 
+    const fetchPosts = async () => {
+        const data = await getPostsAction(symbol);
+        setPosts(data);
+    };
+
     useEffect(() => {
-        const fetchPosts = async () => {
-            const data = await getPostsAction(symbol);
-            setPosts(data);
-        };
         fetchPosts();
     }, [symbol]);
 
@@ -30,6 +31,12 @@ export default function StockBoard({ symbol }: StockBoardProps) {
         setPosts([post, ...posts]);
         setNewPost('');
         setAuthor('');
+    };
+
+    const handleLike = async (postId: string) => {
+        await likePostAction(postId, symbol);
+        // 간단한 로컬 업데이트
+        setPosts(posts.map(p => p.id === postId ? { ...p, likes: p.likes + 1 } : p));
     };
 
     return (
@@ -83,8 +90,11 @@ export default function StockBoard({ symbol }: StockBoardProps) {
                                     <span className="font-bold text-sm text-neutral-900">{post.author}</span>
                                     <span className="text-xs text-neutral-600 font-medium">{post.createdAt}</span>
                                 </div>
-                                <button className="flex items-center gap-1.5 text-xs font-semibold text-neutral-600 hover:text-red-500 transition-colors">
-                                    <ThumbsUp size={14} />
+                                <button
+                                    onClick={() => handleLike(post.id)}
+                                    className="flex items-center gap-1.5 text-xs font-semibold text-neutral-600 hover:text-red-500 transition-colors bg-neutral-50 px-3 py-1.5 rounded-full hover:bg-red-50"
+                                >
+                                    <ThumbsUp size={14} className={post.likes > 0 ? 'fill-red-500 text-red-500' : ''} />
                                     {post.likes}
                                 </button>
                             </div>

@@ -8,56 +8,26 @@ import { motion, AnimatePresence } from 'framer-motion';
 // Mock Insight Data
 const INSIGHT_CATEGORIES = ['전체', '시장 분석', '전문가 칼럼', '해외 뉴스', '산업 트렌드'];
 
-const INSIGHT_POSTS = [
-    {
-        id: '1',
-        category: '시장 분석',
-        title: '2025년 반도체 시장 전망: AI가 견인하는 슈퍼 사이클',
-        summary: 'AI 서버 수요 폭증으로 인한 메모리 반도체 시장의 변화와 주요 기업들의 전략을 분석합니다.',
-        author: '김분석 연구원',
-        time: '1시간 전',
-        image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=800',
-        content: '인공지능(AI) 기술의 급격한 발전이 반도체 산업의 지형도를 완전히 바꾸고 있습니다. 특히 고대역폭 메모리(HBM)와 같은 차세대 반도체 수요가 폭발적으로 증가하면서, 기존의 하드웨어 중심 시장에서 소프트웨어와 하드웨어가 융합된 플랫폼 중심 시장으로의 전환이 가속화되고 있습니다.'
-    },
-    {
-        id: '2',
-        category: '전문가 칼럼',
-        title: '금리 하락기, 투자 포트폴리오 재구축 전략',
-        summary: '금리 인하 기조가 뚜렷해지는 시점에서 배당주와 성장주의 적절한 배분 비중에 대해 조언합니다.',
-        author: 'Lee Capital',
-        time: '3시간 전',
-        image: 'https://images.unsplash.com/photo-1611974717482-480929974861?auto=format&fit=crop&q=80&w=800',
-        content: '금리 환경의 변화는 투자자의 판단을 어렵게 만듭니다. 하지만 역사적으로 금리 하락기는 자산 가격 상승의 촉매제가 되어왔습니다. 우리는 현재 시점에서 방어적인 포트폴리오보다는 유동성 공급의 수혜를 직접적으로 입을 수 있는 성장 섹터에 주목할 필요가 있습니다.'
-    },
-    {
-        id: '3',
-        category: '해외 뉴스',
-        title: '미국 연준, 추가 금리 인하 가능성 시사',
-        summary: '제롬 파월 연준 의장의 최근 발언을 토대로 향후 통화 정책의 향방을 입체적으로 분석합니다.',
-        author: 'Reuters Global',
-        time: '5시간 전',
-        image: 'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&q=80&w=800',
-        content: '미 연방준비제도(Fed)가 물가 안정에 대한 자신감을 내비치며 추가적인 금리 조정 가능성을 열어두었습니다. 이는 세계 시장의 불확실성을 해소하는 긍정적인 신호로 해석되며, 특히 기술주 중심의 나스닥 시장에 강한 매수세가 유입될 것으로 보입니다.'
-    },
-    {
-        id: '4',
-        category: '산업 트렌드',
-        title: '친환경 에너지 섹터, 정책 변화에 따른 변동성 주의보',
-        summary: '글로벌 주요 국가들의 에너지 정책 변화가 관련 기업들의 주가에 미치는 영향을 점검합니다.',
-        author: 'Green Tech Hub',
-        time: '6시간 전',
-        image: 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&q=80&w=800',
-        content: '친환경 에너지 산업은 정책적 지원이 성장의 핵심 동력입니다. 하지만 최근 일부 국가에서 정치적 지형 변화로 인해 기존의 지원책이 축소되거나 방향이 수정될 조짐을 보이고 있습니다. 이는 장기적으로는 성장이 우세하나, 단기적으로는 심한 주가 변동성을 야기할 수 있는 요소입니다.'
-    }
-];
+import { getInsightsAction, Insight } from '@/app/actions/insights';
 
 export default function InsightsPage() {
     const [activeCategory, setActiveCategory] = useState('전체');
-    const [selectedInsight, setSelectedInsight] = useState<typeof INSIGHT_POSTS[0] | null>(null);
+    const [selectedInsight, setSelectedInsight] = useState<Insight | null>(null);
+    const [insights, setInsights] = useState<Insight[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchInsights = async () => {
+            const data = await getInsightsAction();
+            setInsights(data);
+            setLoading(false);
+        };
+        fetchInsights();
+    }, []);
 
     const filteredPosts = activeCategory === '전체'
-        ? INSIGHT_POSTS
-        : INSIGHT_POSTS.filter(p => p.category === activeCategory);
+        ? insights
+        : insights.filter(p => p.category === activeCategory);
 
     return (
         <div className="min-h-screen bg-neutral-50 pt-32 pb-20 font-sans">

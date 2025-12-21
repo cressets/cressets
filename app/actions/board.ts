@@ -31,3 +31,9 @@ export async function addPostAction(symbol: string, author: string, content: str
         likes: 0
     };
 }
+
+export async function likePostAction(postId: string, symbol: string) {
+    db.prepare('UPDATE posts SET likes = likes + 1 WHERE id = ?').run(postId);
+    revalidatePath(`/stocks/${symbol}`);
+    revalidatePath('/boards');
+}
