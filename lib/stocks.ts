@@ -31,9 +31,28 @@ const ALL_TOP_STOCKS = [...TOP_STOCKS_KR, ...TOP_STOCKS_US];
 export async function searchStocks(query: string): Promise<Stock[]> {
     const lowercaseQuery = query.toLowerCase().trim();
 
-    // 초기 상태: 시가총액 상위 종목 노출
-    if (!lowercaseQuery) return ALL_TOP_STOCKS;
-
+    // 초기 상태: 네이버 실시간 인기 종목 또는 시가총액 상위 종목 노출
+    if (!lowercaseQuery) {
+        try {
+            const naverTopUrl = `https://m.stock.naver.com/front-api/home/realTime/top10?nationType=domestic&sortType=top`;
+            const res = await fetch(naverTopUrl);
+            const data = await res.json();
+            if (data.result && data.result.length > 0) {
+                return data.result.map((item: any) => ({
+                    symbol: item.itemCode + (item.stockExchangeType === 'KOSPI' ? '.KS' : '.KQ'),
+                    name: item.itemName,
+                    price: parseInt(item.closePrice.replace(/,/g, '')),
+                    change: parseInt(item.compareToPreviousClosePrice.replace(/,/g, '')),
+                    changePercent: parseFloat(item.fluctuationsRatio),
+                    market: item.stockExchangeType as Market,
+                    currency: 'KRW'
+                }));
+            }
+        } catch (e) {
+            console.warn('Naver Top API failed:', e);
+        }
+        return ALL_TOP_STOCKS;
+    }
     try {
         // Yahoo Finance Search API 활용 (실제 종목 검색)
         const searchUrl = `https://query1.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(lowercaseQuery)}&quotesCount=10&newsCount=0`;
@@ -87,6 +106,31 @@ export async function searchStocks(query: string): Promise<Stock[]> {
 
 export async function getStockBySymbol(symbol: string): Promise<Stock | undefined> {
     try {
+        // 한국 주식의 경우 네이버 API 시도
+        if (symbol.endsWith('.KS') || symbol.endsWith('.KQ')) {
+            const code = symbol.split('.')[0];
+            try {
+                const naverUrl = `https://polling.finance.naver.com/api/realtime/domestic/stock/${code}`;
+                const res = await fetch(naverUrl);
+                const data = await res.json();
+
+                if (data.result && data.result.areas && data.result.areas.length > 0) {
+                    const stockInfo = data.result.areas[0].datas[0];
+                    return {
+                        symbol: symbol,
+                        name: stockInfo.nm,
+                        price: parseInt(stockInfo.nv.toString()),
+                        change: parseInt(stockInfo.cv.toString()),
+                        changePercent: parseFloat(stockInfo.cr.toString()),
+                        market: symbol.endsWith('.KS') ? 'KOSPI' : 'KOSDAQ',
+                        currency: 'KRW'
+                    };
+                }
+            } catch (e) {
+                console.warn('Naver API failed, falling back to Yahoo:', e);
+            }
+        }
+
         const quoteUrl = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbol}`;
         const res = await fetch(quoteUrl);
         const data = await res.json();
@@ -105,7 +149,7 @@ export async function getStockBySymbol(symbol: string): Promise<Stock | undefine
             price: q.regularMarketPrice,
             change: q.regularMarketChange,
             changePercent: q.regularMarketChangePercent,
-            market: isKR ? 'KR' : isJP ? 'JP' : 'US',
+            market: isKR ? (q.symbol.endsWith('.KS') ? 'KOSPI' : 'KOSDAQ') : isJP ? 'JP' : 'US',
             currency: q.currency
         };
     } catch (error) {

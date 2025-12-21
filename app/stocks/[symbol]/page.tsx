@@ -75,7 +75,7 @@ export default function StockDetailPage({ params }: PageProps) {
     const isPositive = stock.change >= 0;
 
     return (
-        <div className="min-h-screen bg-neutral-50 pb-20 font-sans">
+        <div className="min-h-screen bg-neutral-50 pb-20 font-sans pt-24">
             {/* Detail Header */}
             <div className="bg-white border-b border-neutral-200">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

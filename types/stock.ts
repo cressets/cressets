@@ -1,4 +1,4 @@
-export type Market = 'US' | 'KR' | 'JP';
+export type Market = 'US' | 'KR' | 'JP' | 'KOSPI' | 'KOSDAQ';
 
 export interface Stock {
     symbol: string;
