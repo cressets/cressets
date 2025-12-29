@@ -17,12 +17,12 @@ export default function Home() {
           </div>
 
           <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-neutral-900 max-w-5xl leading-[0.95] animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-100">
-            Illuminate Your <br />
-            <span className="text-neutral-400">Financial Future.</span>
+            Discover Market Insights <br />
+            <span className="text-neutral-400">With Clarity & Confidence.</span>
           </h1>
 
-          <p className="text-xl md:text-2xl text-neutral-800 max-w-2xl leading-relaxed animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-200">
-            Cressets은 데이터 기반의 통찰력으로 복잡한 시장을 밝히는 등불입니다. 실시간 검색, 집단 지성, 그리고 AI 분석을 한 곳에서 경험하세요.
+          <p className="text-xl md:text-2xl text-neutral-800 max-w-3xl leading-relaxed animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-200">
+            Manage your assets with clarity and confidence. Cressets is a financial platform that provides stock market search.
           </p>
 
           <div className="flex flex-wrap justify-center gap-4 pt-4 animate-in fade-in slide-in-from-bottom-16 duration-1000 delay-300">
@@ -45,20 +45,14 @@ export default function Home() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-32 items-center">
           <div className="relative group">
             <div className="absolute inset-0 bg-neutral-900 rounded-[60px] blur-3xl opacity-0 group-hover:opacity-10 transition-opacity duration-700" />
-            <div className="relative rounded-[50px] overflow-hidden border border-neutral-100 shadow-2xl bg-neutral-50 aspect-video flex items-center justify-center p-12">
-              <Image
-                src="/dashboard.png"
-                alt="Cressets Dashboard"
-                width={800}
-                height={500}
-                className="rounded-3xl shadow-2xl transform group-hover:scale-[1.02] transition-transform duration-700"
-              />
-            </div>
-            <div className="absolute -bottom-6 -right-6 bg-white p-8 rounded-3xl shadow-2xl border border-neutral-100 max-w-[240px]">
-              <div className="flex items-center gap-2 text-emerald-500 font-black mb-2">
-                <TrendingUp size={18} /> +32.8%
-              </div>
-              <p className="text-xs text-neutral-500 leading-tight">AI가 분석한 Cressets Growth Index 2025 전망</p>
+            <div className="relative rounded-[50px] overflow-hidden border border-neutral-100 shadow-2xl bg-neutral-50 aspect-video flex items-center justify-center">
+              <iframe
+                src='https://my.spline.design/distortingtypography-Qier0H5BcyfxKF8WPjicG1Nr/'
+                frameBorder='0'
+                width='100%'
+                height='100%'
+                className="w-full h-full min-h-[500px]"
+              ></iframe>
             </div>
           </div>
 
