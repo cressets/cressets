@@ -4,14 +4,23 @@ import { fetchPublicStockPriceInfo, PublicStockItem } from '@/lib/public-data';
 import { Stock, ChartData } from '@/types/stock';
 
 /**
- * 공식 공공데이터 API만을 사용하여 종목을 검색합니다. (웹 크롤링 제거)
+ * 공식 공공데이터 API만을 사용하여 종목을 검색합니다.
  */
 export async function searchStocksAction(query: string): Promise<Stock[]> {
     if (!query) return getTopStocksAction('ALL');
 
-    const items = await fetchPublicStockPriceInfo({ itmsNm: query });
+    const cleanQuery = query.trim();
+    const items = await fetchPublicStockPriceInfo({ itmsNm: cleanQuery });
 
-    return items.map(item => ({
+    // 중복 제거 (같은 종목의 다른 날짜 데이터가 올 수 있음)
+    const seen = new Set();
+    const uniqueItems = items.filter(item => {
+        if (seen.has(item.srtnCd)) return false;
+        seen.add(item.srtnCd);
+        return true;
+    });
+
+    return uniqueItems.map(item => ({
         symbol: item.srtnCd,
         name: item.itmsNm,
         price: parseInt(item.clpr),
@@ -24,15 +33,25 @@ export async function searchStocksAction(query: string): Promise<Stock[]> {
 
 /**
  * 심볼(단축코드)을 기반으로 상세 정보를 가져옵니다.
+ * 심볼에 포함된 접미사(.KS, .KQ 등)를 제거하고 검색합니다.
  */
 export async function getStockBySymbolAction(symbol: string): Promise<Stock | undefined> {
-    const items = await fetchPublicStockPriceInfo({ isinCd: symbol }); // isinCd 또는 srtnCd 활용
-    // 만약 isinCd로 안나온다면 itmsNm 등으로 재시도할 수 있으나, 여기선 symbol이 srtnCd라고 가정
-    const results = items.length > 0 ? items : await fetchPublicStockPriceInfo({ srtnCd: symbol });
+    if (!symbol) return undefined;
 
-    if (results.length === 0) return undefined;
+    // 접미사 제거 (예: 005930.KS -> 005930)
+    const cleanSymbol = symbol.split('.')[0].trim();
 
-    const item = results[0];
+    // srtnCd(단축코드)로 우선 검색
+    const items = await fetchPublicStockPriceInfo({ srtnCd: cleanSymbol, numOfRows: 1 });
+
+    if (items.length === 0) {
+        // 단축코드로 안나올 경우 ISIN 코드로 재시도
+        const isinItems = await fetchPublicStockPriceInfo({ isinCd: cleanSymbol, numOfRows: 1 });
+        if (isinItems.length === 0) return undefined;
+        items.push(...isinItems);
+    }
+
+    const item = items[0];
     return {
         symbol: item.srtnCd,
         name: item.itmsNm,
@@ -45,10 +64,11 @@ export async function getStockBySymbolAction(symbol: string): Promise<Stock | un
 }
 
 /**
- * 차트 데이터는 현재 공공데이터에서 일별 시세로 제공되므로, 이를 활용합니다.
+ * 차트 데이터 (최근 30일 시세 활용)
  */
 export async function getStockChartDataAction(symbol: string, range: string = '1d'): Promise<ChartData[]> {
-    const items = await fetchPublicStockPriceInfo({ srtnCd: symbol, numOfRows: 30 });
+    const cleanSymbol = symbol.split('.')[0].trim();
+    const items = await fetchPublicStockPriceInfo({ srtnCd: cleanSymbol, numOfRows: 30 });
 
     return items.reverse().map(item => ({
         time: item.basDt.substring(4, 6) + '/' + item.basDt.substring(6, 8),
@@ -57,20 +77,21 @@ export async function getStockChartDataAction(symbol: string, range: string = '1
 }
 
 export async function getStockStatsAction(symbol: string) {
-    const results = await fetchPublicStockPriceInfo({ srtnCd: symbol });
+    const cleanSymbol = symbol.split('.')[0].trim();
+    const results = await fetchPublicStockPriceInfo({ srtnCd: cleanSymbol, numOfRows: 1 });
     if (results.length === 0) return null;
 
     const item = results[0];
     return {
         volume: parseInt(item.trqu).toLocaleString(),
         marketCap: (parseInt(item.mrktTotAmt) / 100000000).toFixed(0) + '억',
-        high52w: '---', // 공공데이터 기본 API에서 직접 제공하지 않음
+        high52w: '---',
         low52w: '---'
     };
 }
 
 export async function getPublicStockInfoAction(name: string): Promise<PublicStockItem[]> {
-    return fetchPublicStockPriceInfo({ itmsNm: name });
+    return fetchPublicStockPriceInfo({ itmsNm: name, numOfRows: 1 });
 }
 
 export async function getPublicMarketOverviewAction(): Promise<PublicStockItem[]> {
@@ -89,7 +110,14 @@ export async function getTopStocksAction(market: 'KOSPI' | 'KOSDAQ' | 'ALL' = 'A
         allItems = [...allItems, ...items];
     }
 
+    // 중복 제거 및 시가총액 순 정렬
+    const seen = new Set();
     return allItems
+        .filter(item => {
+            if (seen.has(item.srtnCd)) return false;
+            seen.add(item.srtnCd);
+            return true;
+        })
         .sort((a, b) => parseInt(b.mrktTotAmt) - parseInt(a.mrktTotAmt))
         .slice(0, 20)
         .map(item => ({

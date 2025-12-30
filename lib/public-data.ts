@@ -32,7 +32,7 @@ export async function fetchPublicStockPriceInfo(params: {
         return [];
     }
 
-    const baseUrl = 'http://apis.data.go.kr/1160100/service/GetStockSecuritiesInfoService/getStockPriceInfo';
+    const baseUrl = 'https://apis.data.go.kr/1160100/service/GetStockSecuritiesInfoService/getStockPriceInfo';
     const queryParams = new URLSearchParams({
         serviceKey: serviceKey,
         resultType: 'json',
