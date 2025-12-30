@@ -5,8 +5,9 @@ import Link from 'next/link';
 import { ArrowLeft, TrendingUp, TrendingDown, Info, Globe2, Clock, Newspaper, X } from 'lucide-react';
 import { Stock, ChartData } from '@/types/stock';
 import { StockNews } from '@/lib/stocks';
-import { getStockBySymbolAction, getStockChartDataAction, getStockStatsAction } from '@/app/actions/stocks';
+import { getStockBySymbolAction, getStockChartDataAction, getStockStatsAction, getPublicStockInfoAction } from '@/app/actions/stocks';
 import { getStockNewsAction } from '@/app/actions/stock-news';
+import { PublicStockItem } from '@/lib/public-data';
 import StockChart from '@/components/StockChart';
 import StockBoard from '@/components/StockBoard';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -24,6 +25,7 @@ export default function StockDetailPage({ params }: PageProps) {
     const [news, setNews] = useState<StockNews[]>([]);
     const [newsLastScraped, setNewsLastScraped] = useState<string | null>(null);
     const [stats, setStats] = useState<any>(null);
+    const [publicData, setPublicData] = useState<PublicStockItem | null>(null);
     const [loading, setLoading] = useState(true);
     const [selectedNews, setSelectedNews] = useState<StockNews | null>(null);
     const [timeframe, setTimeframe] = useState('1d');
@@ -43,6 +45,14 @@ export default function StockDetailPage({ params }: PageProps) {
                     setNews(newsResponse.news);
                     setNewsLastScraped(newsResponse.lastScrapedAt);
                     setStats(statsData);
+
+                    // Fetch public data if it is a Korean stock
+                    if (stockData.market === 'KOSPI' || stockData.market === 'KOSDAQ') {
+                        const pData = await getPublicStockInfoAction(stockData.name);
+                        if (pData && pData.length > 0) {
+                            setPublicData(pData[0]);
+                        }
+                    }
                 }
             } catch (error) {
                 console.error('Fetch error:', error);
@@ -191,6 +201,52 @@ export default function StockDetailPage({ params }: PageProps) {
                         </div>
 
                         <StockBoard symbol={symbol} />
+
+                        {publicData && (
+                            <div className="bg-white p-8 rounded-[40px] border border-neutral-100 shadow-sm overflow-hidden relative">
+                                <div className="absolute top-0 right-0 p-4">
+                                    <div className="px-2 py-1 bg-blue-50 text-blue-600 text-[10px] font-bold rounded-md">Official</div>
+                                </div>
+                                <h3 className="text-xl font-bold mb-6 text-neutral-900 flex items-center gap-2">
+                                    <Globe2 size={20} className="text-blue-600" />
+                                    금융위원회 공인 데이터
+                                </h3>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                                    <div>
+                                        <p className="text-[10px] font-black text-neutral-400 uppercase mb-1">기준 일자</p>
+                                        <p className="text-sm font-bold text-neutral-900">{publicData.basDt}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] font-black text-neutral-400 uppercase mb-1">시장 구분</p>
+                                        <p className="text-sm font-bold text-neutral-900">{publicData.mrktCls}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] font-black text-neutral-400 uppercase mb-1">상장 주식 수</p>
+                                        <p className="text-sm font-bold text-neutral-900">{parseInt(publicData.lstgStkn).toLocaleString()} 주</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] font-black text-neutral-400 uppercase mb-1">시가 총액</p>
+                                        <p className="text-sm font-bold text-neutral-900">{(parseInt(publicData.mrktTotAmt) / 100000000).toFixed(0)} 억원</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] font-black text-neutral-400 uppercase mb-1">시가</p>
+                                        <p className="text-sm font-bold text-neutral-900">₩{parseInt(publicData.mkp).toLocaleString()}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] font-black text-neutral-400 uppercase mb-1">고가</p>
+                                        <p className="text-sm font-bold text-neutral-900">₩{parseInt(publicData.hipr).toLocaleString()}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] font-black text-neutral-400 uppercase mb-1">저가</p>
+                                        <p className="text-sm font-bold text-neutral-900">₩{parseInt(publicData.lopr).toLocaleString()}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] font-black text-neutral-400 uppercase mb-1">거래량</p>
+                                        <p className="text-sm font-bold text-neutral-900">{parseInt(publicData.trqu).toLocaleString()} 주</p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     {/* Sidebar: Info & Stats */}

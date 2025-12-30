@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Search, TrendingUp, TrendingDown, Globe, SearchIcon } from 'lucide-react';
 import { Stock, Market } from '@/types/stock';
 import { searchStocksAction } from '@/app/actions/stocks';
+import PublicMarketOverview from '@/components/PublicMarketOverview';
 
 export default function StocksPage() {
     const [query, setQuery] = useState('');
@@ -109,6 +110,8 @@ export default function StocksPage() {
                         </div>
                     )}
                 </div>
+
+                <PublicMarketOverview />
             </main>
         </div>
     );
