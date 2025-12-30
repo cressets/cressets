@@ -28,6 +28,8 @@ jobs:
       # 4. 빌드
       - name: Build
         run: npm run build
+        env:
+          API_KEY: ${{ secrets.API_KEY }}
 
       # 4.1. 빌드 폴더 확인 (디버깅용)
       - name: Debug build folders
@@ -56,11 +58,14 @@ jobs:
       # 7. 단 한 번의 SSH 연결로 압축 해제, 구버전 정리, PM2 재시작 처리
       - name: Extract artifacts & Clean & Restart
         uses: appleboy/ssh-action@v1
+        env:
+          API_KEY: ${{ secrets.API_KEY }}
         with:
           host: cressets.mooo.com
           username: ubuntu
           key: ${{ secrets.SSH_KEY }}
           port: 22
+          envs: API_KEY
           command_timeout: 15m
           script: |
             # 1. 환경 변수 로드
@@ -80,7 +85,7 @@ jobs:
             rm artifact.tar.gz
 
             # 4. PM2 재시작 (Standalone 서버 실행)
-            pm2 describe cressets > /dev/null 2>&1 && pm2 reload cressets || PORT=3000 pm2 start server.js --name "cressets"
+            pm2 describe cressets > /dev/null 2>&1 && API_KEY=$API_KEY pm2 reload cressets --update-env || API_KEY=$API_KEY PORT=3000 pm2 start server.js --name "cressets"
             pm2 save
 
             # 5. 구버전 파일 백그라운드 삭제 (I/O 부하 분산)
