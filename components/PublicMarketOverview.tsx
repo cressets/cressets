@@ -53,14 +53,16 @@ export default function PublicMarketOverview() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {data.map((item) => {
-                    const fltRt = parseFloat(item.fltRt);
+                    const fltRt = parseFloat(item.fltRt || '0');
                     const isPositive = fltRt >= 0;
+                    const price = parseInt(item.clpr || '0');
+                    const marketCap = parseInt(item.mrktTotAmt || '0');
 
                     return (
-                        <div key={item.isinCd} className="bg-white p-6 rounded-[32px] border border-neutral-100 shadow-sm hover:shadow-md transition-all">
+                        <div key={item.srtnCd || item.isinCd} className="bg-white p-6 rounded-[32px] border border-neutral-100 shadow-sm hover:shadow-md transition-all">
                             <div className="flex justify-between items-start mb-4">
                                 <div>
-                                    <h3 className="text-lg font-bold text-neutral-900">{item.itmsNm}</h3>
+                                    <h3 className="text-lg font-bold text-neutral-900">{item.itmsNm || '이름 없음'}</h3>
                                     <p className="text-xs font-mono text-neutral-500">{item.srtnCd}</p>
                                 </div>
                                 <div className={`p-2 rounded-xl ${isPositive ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'}`}>
@@ -70,14 +72,14 @@ export default function PublicMarketOverview() {
 
                             <div className="flex justify-between items-end">
                                 <div>
-                                    <p className="text-2xl font-black text-neutral-900">₩{parseInt(item.clpr).toLocaleString()}</p>
+                                    <p className="text-2xl font-black text-neutral-900">₩{price.toLocaleString()}</p>
                                     <p className={`text-sm font-bold ${isPositive ? 'text-red-500' : 'text-blue-500'}`}>
-                                        {isPositive ? '+' : ''}{item.vs} ({item.fltRt}%)
+                                        {isPositive ? '+' : ''}{item.vs || '0'} ({item.fltRt || '0'}%)
                                     </p>
                                 </div>
                                 <div className="text-right">
                                     <p className="text-[10px] font-black text-neutral-400 uppercase">시가총액</p>
-                                    <p className="text-xs font-bold text-neutral-900">{(parseInt(item.mrktTotAmt) / 1000000000000).toFixed(1)}조</p>
+                                    <p className="text-xs font-bold text-neutral-900">{(marketCap / 1000000000000).toFixed(1)}조</p>
                                 </div>
                             </div>
                         </div>
