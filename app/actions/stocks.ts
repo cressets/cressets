@@ -27,3 +27,29 @@ export async function getPublicStockInfoAction(name: string): Promise<PublicStoc
 export async function getPublicMarketOverviewAction(): Promise<PublicStockItem[]> {
     return fetchPublicStockPriceInfo({ numOfRows: 6, mrktCls: 'KOSPI' });
 }
+
+export async function getTopStocksAction(market: 'KOSPI' | 'KOSDAQ' | 'ALL' = 'ALL'): Promise<Stock[]> {
+    const markets = market === 'ALL' ? ['KOSPI', 'KOSDAQ'] : [market];
+    let allItems: PublicStockItem[] = [];
+
+    for (const m of markets) {
+        const items = await fetchPublicStockPriceInfo({
+            mrktCls: m,
+            numOfRows: 20
+        });
+        allItems = [...allItems, ...items];
+    }
+
+    return allItems
+        .sort((a, b) => parseInt(b.mrktTotAmt) - parseInt(a.mrktTotAmt))
+        .slice(0, 20)
+        .map(item => ({
+            symbol: item.srtnCd,
+            name: item.itmsNm,
+            price: parseInt(item.clpr),
+            change: parseInt(item.vs),
+            changePercent: parseFloat(item.fltRt),
+            market: item.mrktCls as any,
+            currency: 'KRW'
+        }));
+}

@@ -61,15 +61,6 @@ export default function Header() {
                     ))}
                 </div>
 
-                {/* Action Button */}
-                <div className="hidden md:block">
-                    <Link
-                        href="/stocks"
-                        className="bg-neutral-900 text-white px-6 py-2.5 rounded-full text-sm font-black hover:bg-neutral-800 transition-all shadow-lg hover:shadow-neutral-200 active:scale-95"
-                    >
-                        시작하기 ↗
-                    </Link>
-                </div>
 
                 {/* Mobile Menu Button */}
                 <button
@@ -94,13 +85,6 @@ export default function Header() {
                             {item.name}
                         </Link>
                     ))}
-                    <Link
-                        href="/stocks"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className="w-full bg-neutral-900 text-white py-4 rounded-2xl font-black text-center mt-4"
-                    >
-                        시작하기 ↗
-                    </Link>
                 </div>
             )}
         </nav>

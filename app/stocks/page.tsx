@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Search, TrendingUp, TrendingDown, Globe, SearchIcon } from 'lucide-react';
 import { Stock, Market } from '@/types/stock';
-import { searchStocksAction } from '@/app/actions/stocks';
+import { searchStocksAction, getTopStocksAction } from '@/app/actions/stocks';
 import PublicMarketOverview from '@/components/PublicMarketOverview';
 
 export default function StocksPage() {
@@ -14,6 +14,15 @@ export default function StocksPage() {
 
     useEffect(() => {
         const fetchStocks = async () => {
+            if (!query) {
+                // 진입 시 또는 검색어 없을 때 시가총액 상위 20위 로드
+                const topStocks = await getTopStocksAction(marketFilter === 'KR' ? 'ALL' : 'ALL');
+                // 참고: 현재 getTopStocksAction은 KR 시장만 지원하므로 필터에 상관없이 KR 상위를 보여주거나 
+                // 향후 확장을 위해 로직 유지
+                setStocks(topStocks);
+                return;
+            }
+
             const results = await searchStocksAction(query);
             if (marketFilter === 'ALL') {
                 setStocks(results);
