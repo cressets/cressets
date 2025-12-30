@@ -17,6 +17,11 @@ export interface PublicStockItem {
     mrktTotAmt: string;
 }
 
+/**
+ * 전제조건: API_KEY는 공공데이터포털에서 제공하는 '인코딩된(Encoded)' 키여야 합니다.
+ * 만약 디코딩된 키인 경우 URLSearchParams에서 자동으로 인코딩되도록 구성해야 합니다.
+ * 여기서는 인코딩된 키가 입력된다고 가정하고 수동으로 연결합니다.
+ */
 export async function fetchPublicStockPriceInfo(params: {
     itmsNm?: string;
     isinCd?: string;
@@ -30,20 +35,17 @@ export async function fetchPublicStockPriceInfo(params: {
 }): Promise<PublicStockItem[]> {
     const serviceKey = process.env.API_KEY;
     if (!serviceKey) {
-        console.error('API_KEY is not defined in environment variables.');
+        console.error('[PublicAPI] ERROR: API_KEY is missing');
         return [];
     }
 
     const baseUrl = 'https://apis.data.go.kr/1160100/service/GetStockSecuritiesInfoService/getStockPriceInfo';
 
-    // URLSearchParams can double-encode serviceKey if it's already encoded. 
-    // Data.go.kr service keys are notoriously sensitive to this.
-    // We append serviceKey manually to avoid double encoding.
-    const queryParams = new URLSearchParams({
-        resultType: 'json',
-        numOfRows: (params.numOfRows || 10).toString(),
-        pageNo: (params.pageNo || 1).toString(),
-    });
+    // 수동으로 쿼리 파라미터 생성 (serviceKey는 인코딩 오염 방지를 위해 별도로 처리)
+    const queryParams = new URLSearchParams();
+    queryParams.append('resultType', 'json');
+    queryParams.append('numOfRows', (params.numOfRows || 10).toString());
+    queryParams.append('pageNo', (params.pageNo || 1).toString());
 
     if (params.itmsNm) queryParams.append('itmsNm', params.itmsNm);
     if (params.isinCd) queryParams.append('isinCd', params.isinCd);
@@ -53,48 +55,50 @@ export async function fetchPublicStockPriceInfo(params: {
     if (params.likeSrtnCd) queryParams.append('likeSrtnCd', params.likeSrtnCd);
     if (params.likeItmsNm) queryParams.append('likeItmsNm', params.likeItmsNm);
 
+    // 공공데이터포털 특이사항: serviceKey는 이미 인코딩되어 있으므로 URLSearchParams에 넣으면 이중 인코딩됨.
+    // 따라서 수동으로 붙임.
     const fullUrl = `${baseUrl}?serviceKey=${serviceKey}&${queryParams.toString()}`;
 
     try {
-        console.log(`Fetching public data: ${baseUrl}?serviceKey=HIDDEN&${queryParams.toString()}`);
         const response = await fetch(fullUrl, {
-            next: { revalidate: 3600 }
+            next: { revalidate: 3600 },
+            headers: { 'Accept': 'application/json' }
         });
 
-        const text = await response.text();
-
         if (!response.ok) {
-            console.error(`HTTP error! status: ${response.status}, body: ${text.substring(0, 200)}`);
+            const errText = await response.text();
+            console.error(`[PublicAPI] HTTP Error: ${response.status}`, errText.substring(0, 500));
             return [];
         }
 
+        const text = await response.text();
+        if (!text) return [];
+
         try {
             const data = JSON.parse(text);
-
-            // Handle error codes from API even with 200 OK
             const resultCode = data?.response?.header?.resultCode;
+
             if (resultCode && resultCode !== '00') {
-                console.error(`API Error: ${resultCode} - ${data?.response?.header?.resultMsg}`);
+                console.warn(`[PublicAPI] API Business Error: ${resultCode} - ${data?.response?.header?.resultMsg}`);
                 return [];
             }
 
             const items = data?.response?.body?.items?.item;
-
             if (!items) return [];
             return Array.isArray(items) ? items : [items];
-        } catch (e) {
-            // If JSON parse fails, it might be XML error from the portal
-            console.error('Failed to parse JSON response. Body might be XML error:', text.substring(0, 500));
+        } catch (jsonError) {
+            // JSON 파싱 실패 시 XML 에러 메시지일 가능성이 큼
+            console.error('[PublicAPI] JSON Parse Error. Response might be XML error:', text.substring(0, 500));
             return [];
         }
     } catch (error) {
-        console.error('Error fetching public stock info:', error);
+        console.error('[PublicAPI] Unexpected Network Error:', error);
         return [];
     }
 }
 
 export async function getMarketOverview(): Promise<PublicStockItem[]> {
-    return fetchPublicStockPriceInfo({
+    return await fetchPublicStockPriceInfo({
         numOfRows: 20,
         mrktCls: 'KOSPI'
     });

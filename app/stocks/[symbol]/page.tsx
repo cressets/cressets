@@ -222,27 +222,27 @@ export default function StockDetailPage({ params }: PageProps) {
                                     </div>
                                     <div>
                                         <p className="text-[10px] font-black text-neutral-400 uppercase mb-1">상장 주식 수</p>
-                                        <p className="text-sm font-bold text-neutral-900">{parseInt(publicData.lstgStCnt).toLocaleString()} 주</p>
+                                        <p className="text-sm font-bold text-neutral-900">{(parseInt(publicData.lstgStCnt) || 0).toLocaleString()} 주</p>
                                     </div>
                                     <div>
                                         <p className="text-[10px] font-black text-neutral-400 uppercase mb-1">시가 총액</p>
-                                        <p className="text-sm font-bold text-neutral-900">{(parseInt(publicData.mrktTotAmt) / 100000000).toFixed(0)} 억원</p>
+                                        <p className="text-sm font-bold text-neutral-900">{((parseInt(publicData.mrktTotAmt) || 0) / 100000000).toFixed(0)} 억원</p>
                                     </div>
                                     <div>
                                         <p className="text-[10px] font-black text-neutral-400 uppercase mb-1">시가</p>
-                                        <p className="text-sm font-bold text-neutral-900">₩{parseInt(publicData.mkp).toLocaleString()}</p>
+                                        <p className="text-sm font-bold text-neutral-900">₩{(parseInt(publicData.mkp) || 0).toLocaleString()}</p>
                                     </div>
                                     <div>
                                         <p className="text-[10px] font-black text-neutral-400 uppercase mb-1">고가</p>
-                                        <p className="text-sm font-bold text-neutral-900">₩{parseInt(publicData.hipr).toLocaleString()}</p>
+                                        <p className="text-sm font-bold text-neutral-900">₩{(parseInt(publicData.hipr) || 0).toLocaleString()}</p>
                                     </div>
                                     <div>
                                         <p className="text-[10px] font-black text-neutral-400 uppercase mb-1">저가</p>
-                                        <p className="text-sm font-bold text-neutral-900">₩{parseInt(publicData.lopr).toLocaleString()}</p>
+                                        <p className="text-sm font-bold text-neutral-900">₩{(parseInt(publicData.lopr) || 0).toLocaleString()}</p>
                                     </div>
                                     <div>
                                         <p className="text-[10px] font-black text-neutral-400 uppercase mb-1">거래량</p>
-                                        <p className="text-sm font-bold text-neutral-900">{parseInt(publicData.trqu).toLocaleString()} 주</p>
+                                        <p className="text-sm font-bold text-neutral-900">{(parseInt(publicData.trqu) || 0).toLocaleString()} 주</p>
                                     </div>
                                 </div>
                             </div>

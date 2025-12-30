@@ -3,12 +3,20 @@
 import { fetchPublicStockPriceInfo, PublicStockItem } from '@/lib/public-data';
 import { Stock, ChartData } from '@/types/stock';
 
+// 숫자가 아닌 문자를 모두 제거하고 숫자로 변환하는 도우미 (콤마 등 대응)
+const parseNumeric = (val: string | undefined | null): number => {
+    if (!val) return 0;
+    const clean = val.toString().replace(/[^0-9.-]/g, '');
+    const num = parseFloat(clean);
+    return isNaN(num) ? 0 : num;
+};
+
 /**
  * 공식 공공데이터 API만을 사용하여 종목을 검색합니다.
  */
 export async function searchStocksAction(query: string): Promise<Stock[]> {
     try {
-        if (!query) return getTopStocksAction('ALL');
+        if (!query) return await getTopStocksAction('ALL');
 
         const cleanQuery = query.trim();
         const isNumeric = /^\d+$/.test(cleanQuery);
@@ -30,14 +38,14 @@ export async function searchStocksAction(query: string): Promise<Stock[]> {
         return uniqueItems.map(item => ({
             symbol: item.srtnCd,
             name: item.itmsNm,
-            price: parseInt(item.clpr || '0'),
-            change: parseInt(item.vs || '0'),
-            changePercent: parseFloat(item.fltRt || '0'),
+            price: parseNumeric(item.clpr),
+            change: parseNumeric(item.vs),
+            changePercent: parseNumeric(item.fltRt),
             market: (item.mrktCtg || 'KOSPI') as any,
             currency: 'KRW'
         }));
     } catch (error) {
-        console.error('searchStocksAction error:', error);
+        console.error('[Action] searchStocksAction Error:', error);
         return [];
     }
 }
@@ -65,14 +73,14 @@ export async function getStockBySymbolAction(symbol: string): Promise<Stock | un
         return {
             symbol: item.srtnCd,
             name: item.itmsNm,
-            price: parseInt(item.clpr || '0'),
-            change: parseInt(item.vs || '0'),
-            changePercent: parseFloat(item.fltRt || '0'),
+            price: parseNumeric(item.clpr),
+            change: parseNumeric(item.vs),
+            changePercent: parseNumeric(item.fltRt),
             market: (item.mrktCtg || 'KOSPI') as any,
             currency: 'KRW'
         };
     } catch (error) {
-        console.error('getStockBySymbolAction error:', error);
+        console.error('[Action] getStockBySymbolAction Error:', error);
         return undefined;
     }
 }
@@ -89,10 +97,10 @@ export async function getStockChartDataAction(symbol: string, range: string = '1
 
         return items.reverse().map(item => ({
             time: item.basDt ? (item.basDt.substring(4, 6) + '/' + item.basDt.substring(6, 8)) : '',
-            price: parseInt(item.clpr || '0')
+            price: parseNumeric(item.clpr)
         }));
     } catch (error) {
-        console.error('getStockChartDataAction error:', error);
+        console.error('[Action] getStockChartDataAction Error:', error);
         return [];
     }
 }
@@ -107,31 +115,31 @@ export async function getStockStatsAction(symbol: string) {
         if (!item) return null;
 
         return {
-            volume: parseInt(item.trqu || '0').toLocaleString(),
-            marketCap: (parseInt(item.mrktTotAmt || '0') / 100000000).toFixed(0) + '억',
+            volume: parseNumeric(item.trqu).toLocaleString(),
+            marketCap: (parseNumeric(item.mrktTotAmt) / 100000000).toFixed(0) + '억',
             high52w: '---',
             low52w: '---'
         };
     } catch (error) {
-        console.error('getStockStatsAction error:', error);
+        console.error('[Action] getStockStatsAction Error:', error);
         return null;
     }
 }
 
 export async function getPublicStockInfoAction(name: string): Promise<PublicStockItem[]> {
     try {
-        return fetchPublicStockPriceInfo({ itmsNm: name, numOfRows: 1 });
+        return await fetchPublicStockPriceInfo({ itmsNm: name, numOfRows: 1 });
     } catch (error) {
-        console.error('getPublicStockInfoAction error:', error);
+        console.error('[Action] getPublicStockInfoAction Error:', error);
         return [];
     }
 }
 
 export async function getPublicMarketOverviewAction(): Promise<PublicStockItem[]> {
     try {
-        return fetchPublicStockPriceInfo({ numOfRows: 6, mrktCls: 'KOSPI' });
+        return await fetchPublicStockPriceInfo({ numOfRows: 6, mrktCls: 'KOSPI' });
     } catch (error) {
-        console.error('getPublicMarketOverviewAction error:', error);
+        console.error('[Action] getPublicMarketOverviewAction Error:', error);
         return [];
     }
 }
@@ -156,19 +164,19 @@ export async function getTopStocksAction(market: 'KOSPI' | 'KOSDAQ' | 'ALL' = 'A
                 seen.add(item.srtnCd);
                 return true;
             })
-            .sort((a, b) => parseInt(b.mrktTotAmt || '0') - parseInt(a.mrktTotAmt || '0'))
+            .sort((a, b) => parseNumeric(b.mrktTotAmt) - parseNumeric(a.mrktTotAmt))
             .slice(0, 20)
             .map(item => ({
                 symbol: item.srtnCd,
                 name: item.itmsNm,
-                price: parseInt(item.clpr || '0'),
-                change: parseInt(item.vs || '0'),
-                changePercent: parseFloat(item.fltRt || '0'),
+                price: parseNumeric(item.clpr),
+                change: parseNumeric(item.vs),
+                changePercent: parseNumeric(item.fltRt),
                 market: (item.mrktCtg || 'KOSPI') as any,
                 currency: 'KRW'
             }));
     } catch (error) {
-        console.error('getTopStocksAction error:', error);
+        console.error('[Action] getTopStocksAction Error:', error);
         return [];
     }
 }
