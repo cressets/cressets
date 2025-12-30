@@ -4,7 +4,7 @@ export interface PublicStockItem {
     srtnCd: string;
     isinCd: string;
     itmsNm: string;
-    mrktCls: string;
+    mrktCtg: string; // Documentation says mrktCtg in response
     clpr: string;
     vs: string;
     fltRt: string;
@@ -13,7 +13,7 @@ export interface PublicStockItem {
     lopr: string;
     trqu: string;
     trPrc: string;
-    lstgStkn: string;
+    lstgStCnt: string; // Documentation says lstgStCnt in response
     mrktTotAmt: string;
 }
 
@@ -23,6 +23,8 @@ export async function fetchPublicStockPriceInfo(params: {
     mrktCls?: string;
     basDt?: string;
     srtnCd?: string;
+    likeSrtnCd?: string; // Partial match supported
+    likeItmsNm?: string; // Partial match supported
     numOfRows?: number;
     pageNo?: number;
 }): Promise<PublicStockItem[]> {
@@ -44,7 +46,9 @@ export async function fetchPublicStockPriceInfo(params: {
     if (params.isinCd) queryParams.append('isinCd', params.isinCd);
     if (params.mrktCls) queryParams.append('mrktCls', params.mrktCls);
     if (params.basDt) queryParams.append('basDt', params.basDt);
-    if (params.srtnCd) queryParams.append('srtnCd', params.srtnCd);
+    if (params.srtnCd) queryParams.append('likeSrtnCd', params.srtnCd); // Use likeSrtnCd as documentation doesn't have srtnCd exact parameter
+    if (params.likeSrtnCd) queryParams.append('likeSrtnCd', params.likeSrtnCd);
+    if (params.likeItmsNm) queryParams.append('likeItmsNm', params.likeItmsNm);
 
     try {
         const response = await fetch(`${baseUrl}?${queryParams.toString()}`, {

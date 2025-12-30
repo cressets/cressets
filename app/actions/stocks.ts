@@ -10,7 +10,15 @@ export async function searchStocksAction(query: string): Promise<Stock[]> {
     if (!query) return getTopStocksAction('ALL');
 
     const cleanQuery = query.trim();
-    const items = await fetchPublicStockPriceInfo({ itmsNm: cleanQuery });
+    // 종목명이면 itmsNm으로 검색, 숫자면 srtnCd로 검색하도록 유연하게 대응
+    const isNumeric = /^\d+$/.test(cleanQuery);
+
+    let items: PublicStockItem[] = [];
+    if (isNumeric) {
+        items = await fetchPublicStockPriceInfo({ srtnCd: cleanQuery });
+    } else {
+        items = await fetchPublicStockPriceInfo({ likeItmsNm: cleanQuery });
+    }
 
     // 중복 제거 (같은 종목의 다른 날짜 데이터가 올 수 있음)
     const seen = new Set();
@@ -26,26 +34,23 @@ export async function searchStocksAction(query: string): Promise<Stock[]> {
         price: parseInt(item.clpr),
         change: parseInt(item.vs),
         changePercent: parseFloat(item.fltRt),
-        market: item.mrktCls as any,
+        market: item.mrktCtg as any,
         currency: 'KRW'
     }));
 }
 
 /**
  * 심볼(단축코드)을 기반으로 상세 정보를 가져옵니다.
- * 심볼에 포함된 접미사(.KS, .KQ 등)를 제거하고 검색합니다.
  */
 export async function getStockBySymbolAction(symbol: string): Promise<Stock | undefined> {
     if (!symbol) return undefined;
 
-    // 접미사 제거 (예: 005930.KS -> 005930)
     const cleanSymbol = symbol.split('.')[0].trim();
 
-    // srtnCd(단축코드)로 우선 검색
+    // srtnCd(단축코드) 검색 -> fetchPublicStockPriceInfo 내부에서 likeSrtnCd로 변환됨
     const items = await fetchPublicStockPriceInfo({ srtnCd: cleanSymbol, numOfRows: 1 });
 
     if (items.length === 0) {
-        // 단축코드로 안나올 경우 ISIN 코드로 재시도
         const isinItems = await fetchPublicStockPriceInfo({ isinCd: cleanSymbol, numOfRows: 1 });
         if (isinItems.length === 0) return undefined;
         items.push(...isinItems);
@@ -58,7 +63,7 @@ export async function getStockBySymbolAction(symbol: string): Promise<Stock | un
         price: parseInt(item.clpr),
         change: parseInt(item.vs),
         changePercent: parseFloat(item.fltRt),
-        market: item.mrktCls as any,
+        market: item.mrktCtg as any,
         currency: 'KRW'
     };
 }
@@ -110,7 +115,6 @@ export async function getTopStocksAction(market: 'KOSPI' | 'KOSDAQ' | 'ALL' = 'A
         allItems = [...allItems, ...items];
     }
 
-    // 중복 제거 및 시가총액 순 정렬
     const seen = new Set();
     return allItems
         .filter(item => {
@@ -126,7 +130,7 @@ export async function getTopStocksAction(market: 'KOSPI' | 'KOSDAQ' | 'ALL' = 'A
             price: parseInt(item.clpr),
             change: parseInt(item.vs),
             changePercent: parseFloat(item.fltRt),
-            market: item.mrktCls as any,
+            market: item.mrktCtg as any,
             currency: 'KRW'
         }));
 }

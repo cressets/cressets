@@ -218,11 +218,11 @@ export default function StockDetailPage({ params }: PageProps) {
                                     </div>
                                     <div>
                                         <p className="text-[10px] font-black text-neutral-400 uppercase mb-1">시장 구분</p>
-                                        <p className="text-sm font-bold text-neutral-900">{publicData.mrktCls}</p>
+                                        <p className="text-sm font-bold text-neutral-900">{publicData.mrktCtg}</p>
                                     </div>
                                     <div>
                                         <p className="text-[10px] font-black text-neutral-400 uppercase mb-1">상장 주식 수</p>
-                                        <p className="text-sm font-bold text-neutral-900">{parseInt(publicData.lstgStkn).toLocaleString()} 주</p>
+                                        <p className="text-sm font-bold text-neutral-900">{parseInt(publicData.lstgStCnt).toLocaleString()} 주</p>
                                     </div>
                                     <div>
                                         <p className="text-[10px] font-black text-neutral-400 uppercase mb-1">시가 총액</p>
