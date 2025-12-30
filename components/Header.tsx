@@ -38,27 +38,29 @@ export default function Header() {
                 </Link>
 
                 {/* Desktop Navigation */}
-                <div className="hidden md:flex items-center gap-1">
-                    {NAV_ITEMS.map((item) => (
-                        <Link
-                            key={item.name}
-                            href={item.href}
-                            className={cn(
-                                "px-5 py-2.5 rounded-full text-sm font-bold transition-all relative group",
-                                pathname === item.href
-                                    ? "text-neutral-900"
-                                    : "text-neutral-800 hover:text-neutral-900"
-                            )}
-                        >
-                            <span className="relative z-10 flex items-center gap-2">
-                                <item.icon size={16} />
-                                {item.name}
-                            </span>
-                            {pathname === item.href && (
-                                <div className="absolute inset-0 bg-neutral-100 rounded-full z-0" />
-                            )}
-                        </Link>
-                    ))}
+                <div className="flex-1 flex justify-center">
+                    <div className="hidden md:flex items-center gap-1">
+                        {NAV_ITEMS.map((item) => (
+                            <Link
+                                key={item.name}
+                                href={item.href}
+                                className={cn(
+                                    "px-5 py-2.5 rounded-full text-sm font-bold transition-all relative group",
+                                    pathname === item.href
+                                        ? "text-neutral-900"
+                                        : "text-neutral-800 hover:text-neutral-900"
+                                )}
+                            >
+                                <span className="relative z-10 flex items-center gap-2">
+                                    <item.icon size={16} />
+                                    {item.name}
+                                </span>
+                                {pathname === item.href && (
+                                    <div className="absolute inset-0 bg-neutral-100 rounded-full z-0" />
+                                )}
+                            </Link>
+                        ))}
+                    </div>
                 </div>
 
 

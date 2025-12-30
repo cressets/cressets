@@ -22,6 +22,7 @@ export async function fetchPublicStockPriceInfo(params: {
     isinCd?: string;
     mrktCls?: string;
     basDt?: string;
+    srtnCd?: string;
     numOfRows?: number;
     pageNo?: number;
 }): Promise<PublicStockItem[]> {
@@ -43,6 +44,7 @@ export async function fetchPublicStockPriceInfo(params: {
     if (params.isinCd) queryParams.append('isinCd', params.isinCd);
     if (params.mrktCls) queryParams.append('mrktCls', params.mrktCls);
     if (params.basDt) queryParams.append('basDt', params.basDt);
+    if (params.srtnCd) queryParams.append('srtnCd', params.srtnCd);
 
     try {
         const response = await fetch(`${baseUrl}?${queryParams.toString()}`, {

@@ -10,13 +10,13 @@ import PublicMarketOverview from '@/components/PublicMarketOverview';
 export default function StocksPage() {
     const [query, setQuery] = useState('');
     const [stocks, setStocks] = useState<Stock[]>([]);
-    const [marketFilter, setMarketFilter] = useState<Market | 'ALL'>('ALL');
+    const [marketFilter, setMarketFilter] = useState<Market | 'ALL'>('KR');
 
     useEffect(() => {
         const fetchStocks = async () => {
             if (!query) {
                 // 진입 시 또는 검색어 없을 때 시가총액 상위 20위 로드
-                const topStocks = await getTopStocksAction(marketFilter === 'KR' ? 'ALL' : 'ALL');
+                const topStocks = await getTopStocksAction(marketFilter === 'KR' || marketFilter === 'ALL' ? 'ALL' : 'ALL');
                 // 참고: 현재 getTopStocksAction은 KR 시장만 지원하므로 필터에 상관없이 KR 상위를 보여주거나 
                 // 향후 확장을 위해 로직 유지
                 setStocks(topStocks);
@@ -57,7 +57,7 @@ export default function StocksPage() {
                     </div>
 
                     <div className="flex gap-2 mt-8 overflow-x-auto pb-2 scrollbar-hide">
-                        {(['ALL', 'US', 'KR', 'JP'] as const).map((m) => (
+                        {(['KR'] as const).map((m) => (
                             <button
                                 key={m}
                                 onClick={() => setMarketFilter(m)}
@@ -66,7 +66,7 @@ export default function StocksPage() {
                                     : 'bg-white border border-neutral-200 text-neutral-600 hover:border-neutral-900'
                                     }`}
                             >
-                                {m === 'ALL' ? '전체 시장' : m === 'US' ? '미국 주식' : m === 'KR' ? '한국 주식' : '일본 주식'}
+                                {m === 'KR' ? '한국 주식' : m}
                             </button>
                         ))}
                     </div>
