@@ -25,6 +25,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # 3.1. Prisma Generate & DB Push (빌드용 임시 DB 생성)
+      - name: Initialize Database for Build
+        run: |
+          npx prisma generate
+          npx prisma db push
+        env:
+          DATABASE_URL: "file:./prod.db"
+
       # 4. 빌드
       - name: Build
         run: npm run build
@@ -32,20 +40,20 @@ jobs:
           API_KEY: ${{ secrets.API_KEY }}
           DATABASE_URL: "file:./prod.db"
 
-      # 4.1. 빌드 폴더 확인 (디버깅용)
-      - name: Debug build folders
-        run: ls -la
-
       # 5. 빌드 산출물 압축 (Standalone 모드 최적화)
-      # .next/standalone 폴더가 실행에 필요한 최소한의 node_modules를 포함함
       - name: Archive build artifacts
         run: |
+          # Standalone용 static 파일 복사
           cp -r .next/static .next/standalone/.next/static
           cp -r public .next/standalone/public
+          
+          # Prisma 스키마 및 마이그레이션 도구 포함 (서버에서 DB 업데이트용)
+          cp -r prisma .next/standalone/prisma
+          
           cd .next/standalone
           tar -czf ../../artifact.tar.gz .
 
-      # 6. SCP로 압축 파일 전송 (이전 파일 삭제 없이 바로 전송)
+      # 6. SCP로 압축 파일 전송
       - name: Upload build artifacts
         uses: appleboy/scp-action@v1
         with:
@@ -56,8 +64,8 @@ jobs:
           source: artifact.tar.gz
           target: /var/www/cressets
 
-      # 7. 단 한 번의 SSH 연결로 압축 해제, 구버전 정리, PM2 재시작 처리
-      - name: Extract artifacts & Clean & Restart
+      # 7. SSH 연결: 압축 해제, DB 마이그레이션, 재시작
+      - name: Extract artifacts & Deploy
         uses: appleboy/ssh-action@v1
         env:
           API_KEY: ${{ secrets.API_KEY }}
@@ -69,7 +77,7 @@ jobs:
           envs: API_KEY
           command_timeout: 15m
           script: |
-            # 1. 환경 변수 로드
+            # 환경 설정
             [ -s "$HOME/.profile" ] && source "$HOME/.profile"
             [ -s "$HOME/.bashrc" ] && source "$HOME/.bashrc"
             export NVM_DIR="$HOME/.nvm"
@@ -77,17 +85,27 @@ jobs:
 
             cd /var/www/cressets
 
-            # 2. 기존 실행 파일들을 임시 폴더로 이동 (삭제보다 빠름)
+            # 백업 및 준비
             mkdir -p old_build
             mv .next public server.js old_build/ 2>/dev/null || true
 
-            # 3. 새 압축 파일 해제
+            # 압축 해제
             tar -xzf artifact.tar.gz
             rm artifact.tar.gz
 
-            # 4. PM2 재시작 (Standalone 서버 실행)
-            pm2 describe cressets > /dev/null 2>&1 && API_KEY=$API_KEY pm2 reload cressets --update-env || API_KEY=$API_KEY PORT=3000 pm2 start server.js --name "cressets"
+            # DB 마이그레이션 (서버의 prod.db 업데이트)
+            # Standalone에는 npx가 없을 수 있으므로 node_modules/.bin/prisma 사용 시도
+            if [ -f "node_modules/.bin/prisma" ]; then
+              DATABASE_URL="file:./prod.db" ./node_modules/.bin/prisma db push
+            else
+              # 없을 경우 글로벌 npx 시도 (서버에 설치되어 있다고 가정)
+              DATABASE_URL="file:./prod.db" npx prisma db push
+            fi
+
+            # PM2 재시작 (메모리 제한 옵션 추가 고려)
+            # --max-memory-restart 800M: 메모리 누수 방지 안전장치
+            pm2 describe cressets > /dev/null 2>&1 && API_KEY=$API_KEY pm2 reload cressets --update-env || API_KEY=$API_KEY PORT=3000 pm2 start server.js --name "cressets" --max-memory-restart 800M
             pm2 save
 
-            # 5. 구버전 파일 백그라운드 삭제 (I/O 부하 분산)
+            # 정리
             rm -rf old_build &
