@@ -1,0 +1,35 @@
+
+> cressets@0.1.0 build
+> npx prisma generate && next build
+
+Environment variables loaded from .env
+Prisma schema loaded from prisma\schema.prisma
+
+✔ Generated Prisma Client (v6.19.1) to .\node_modules\@prisma\client in 225ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Want to turn off tips and other hints? https://pris.ly/tip-4-nohints
+
+▲ Next.js 16.1.1 (Turbopack)
+- Environments: .env
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 3.5s
+  Running TypeScript ...
+Failed to compile.
+
+./app/components/StockChart.tsx:36:25
+Type error: Type '(value: number) => [string, "Close"]' is not assignable to type 'Formatter<number, "Close">'.
+  Types of parameters 'value' and 'value' are incompatible.
+    Type 'number | undefined' is not assignable to type 'number'.
+      Type 'undefined' is not assignable to type 'number'.
+
+[0m [90m 34 |[39m                         contentStyle[33m=[39m{{ border[33m:[39m [32m'2px solid black'[39m[33m,[39m borderRadius[33m:[39m [32m'0px'[39m }}
+ [90m 35 |[39m                         itemStyle[33m=[39m{{ fontWeight[33m:[39m [32m'bold'[39m }}
+[31m[1m>[22m[39m[90m 36 |[39m                         formatter[33m=[39m{(value[33m:[39m number) [33m=>[39m [[32m`${value.toLocaleString()} KRW`[39m[33m,[39m [32m'Close'[39m]}
+ [90m    |[39m                         [31m[1m^[22m[39m
+ [90m 37 |[39m                     [33m/[39m[33m>[39m
+ [90m 38 |[39m                     [33m<[39m[33mLine[39m
+ [90m 39 |[39m                         type[33m=[39m[32m"monotone"[39m[0m
+Next.js build worker exited with code: 1 and signal: null

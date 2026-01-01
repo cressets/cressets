@@ -1,22 +1,16 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import Header from "@/components/Header";
+import { Inter } from "next/font/google"; // Using Inter as per premium design
+import "./globals.css"; // Import global SCSS
+import EmotionRegistry from "./registry";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "CRESSETS",
-  description: "Discover market insights and manage your assets with clarity and confidence. Cressets is a financial platform that provides stock market search.",
+  title: "Cressets | Market Insights",
+  description: "Discover market insights and manage your assets with clarity and confidence.",
 };
+
+import Navbar from "./components/Navbar";
 
 export default function RootLayout({
   children,
@@ -25,11 +19,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans`}
-      >
-        <Header />
-        {children}
+      <body className={inter.className}>
+        <Navbar />
+        <EmotionRegistry>
+          <main className="main-content">{children}</main>
+        </EmotionRegistry>
       </body>
     </html>
   );

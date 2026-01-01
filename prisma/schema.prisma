@@ -10,11 +10,34 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Comment {
-  id          Int      @id @default(autoincrement())
-  stockSymbol String
-  content     String
-  createdAt   DateTime @default(now())
+// Community Models
 
-  @@index([stockSymbol])
+model Board {
+  id          String   @id @default(uuid())
+  name        String   // e.g. "General", "Samsung Electronics"
+  stockSymbol String?  @unique // Nullable for General board
+  posts       Post[]
+  createdAt   DateTime @default(now())
+}
+
+model Post {
+  id        String    @id @default(uuid())
+  title     String
+  content   String
+  author    String    // Nickname
+  password  String?   // For deletion
+  boardId   String
+  board     Board     @relation(fields: [boardId], references: [id])
+  comments  Comment[]
+  createdAt DateTime  @default(now())
+  views     Int       @default(0)
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String
+  author    String   // Nickname
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
 }

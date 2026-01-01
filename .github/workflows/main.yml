@@ -30,6 +30,7 @@ jobs:
         run: npm run build
         env:
           API_KEY: ${{ secrets.API_KEY }}
+          DATABASE_URL: "file:./prod.db"
 
       # 4.1. 빌드 폴더 확인 (디버깅용)
       - name: Debug build folders
