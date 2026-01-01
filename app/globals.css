@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&family=Playfair+Display:wght@400;600;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Jua&family=Manrope:wght@400;500;700&family=Playfair+Display:wght@400;600;700;900&display=swap');
 
 :root {
   /* Noble Finances-inspired Palette */
@@ -16,8 +16,8 @@
   --color-border: #E0E0E0;
 
   /* Typography */
-  --font-heading: 'Playfair Display', serif;
-  --font-body: 'Manrope', sans-serif;
+  --font-heading: 'Playfair Display', 'Jua', serif;
+  --font-body: 'Manrope', 'Jua', sans-serif;
 
   /* Spacing */
   --spacing-sm: 8px;
