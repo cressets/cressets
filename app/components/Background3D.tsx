@@ -7,7 +7,15 @@ import * as random from 'maath/random/dist/maath-random.esm';
 
 function Stars(props: React.ComponentProps<typeof Points>) {
     const ref = useRef<React.ComponentRef<typeof Points>>(null);
-    const [sphere] = useState<Float32Array>(() => random.inSphere(new Float32Array(5000), { radius: 1.5 }));
+    const [sphere] = useState<Float32Array>(() => {
+        const positions = new Float32Array(5000);
+        const result = random.inSphere(positions, { radius: 1.5 }) as Float32Array;
+        // Verify no NaN values
+        for (let i = 0; i < result.length; i++) {
+            if (isNaN(result[i])) result[i] = 0;
+        }
+        return result;
+    });
 
     useFrame((state, delta) => {
         if (ref.current) {

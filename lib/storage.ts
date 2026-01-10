@@ -14,10 +14,13 @@ export function getStorageRoot() {
 }
 
 export function getFilePath(relativePath: string) {
-    // Prevent directory traversal attacks
-    const resolvedPath = path.resolve(STORAGE_ROOT, relativePath);
+    // Clean path to prevent directory traversal
+    // Remove leading slashes and resolve to storage root
+    const cleanPath = relativePath.replace(/^\/+/, '');
+    const resolvedPath = path.join(STORAGE_ROOT, cleanPath);
+
     if (!resolvedPath.startsWith(STORAGE_ROOT)) {
-        throw new Error('Invalid path');
+        throw new Error('Invalid path access');
     }
     return resolvedPath;
 }
