@@ -1,29 +1,26 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google"; // Using Inter as per premium design
-import "./globals.css"; // Import global SCSS
-import EmotionRegistry from "./registry";
+import './globals.css';
+import { Inter } from 'next/font/google';
+import Background3D from './components/Background3D';
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ['latin'] });
 
-export const metadata: Metadata = {
-  title: "Cressets | Market Insights",
-  description: "Discover market insights and manage your assets with clarity and confidence.",
+export const metadata = {
+  title: 'Cressets | Personal Cloud',
+  description: 'Secure, 3D Web Storage',
 };
-
-import Navbar from "./components/Navbar";
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
       <body className={inter.className}>
-        <Navbar />
-        <EmotionRegistry>
-          <main className="main-content">{children}</main>
-        </EmotionRegistry>
+        <Background3D />
+        <main className="relative z-10 min-h-screen flex flex-col">
+          {children}
+        </main>
       </body>
     </html>
   );

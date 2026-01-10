@@ -12,13 +12,21 @@
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@prisma/client": "^6.19.1",
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.5.0",
+    "@types/three": "^0.182.0",
     "axios": "^1.13.2",
     "cheerio": "^1.1.2",
+    "cookies-next": "^6.1.1",
+    "framer-motion": "^12.25.0",
+    "lucide-react": "^0.562.0",
+    "maath": "^0.10.8",
     "next": "16.1.1",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "recharts": "^3.6.0",
-    "sass": "^1.97.1"
+    "sass": "^1.97.1",
+    "three": "^0.182.0"
   },
   "devDependencies": {
     "@types/node": "^20",
