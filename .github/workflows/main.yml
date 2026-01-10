@@ -104,7 +104,7 @@ jobs:
 
             # PM2 재시작 (메모리 제한 옵션 추가 고려)
             # --max-memory-restart 800M: 메모리 누수 방지 안전장치
-            pm2 describe cressets > /dev/null 2>&1 && API_KEY=$API_KEY DATABASE_URL="file:./prod.db" pm2 reload cressets --update-env || API_KEY=$API_KEY DATABASE_URL="file:./prod.db" PORT=3000 pm2 start server.js --name "cressets" --max-memory-restart 800M
+            pm2 describe cressets > /dev/null 2>&1 && API_KEY="$API_KEY" DATABASE_URL="file:./prod.db" pm2 reload cressets --update-env || API_KEY="$API_KEY" DATABASE_URL="file:./prod.db" PORT=3000 pm2 start server.js --name "cressets" --max-memory-restart 800M
             pm2 save
 
             # 정리
