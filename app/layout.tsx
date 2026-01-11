@@ -1,12 +1,11 @@
 import './globals.css';
 import { Inter } from 'next/font/google';
-import Background3D from './components/Background3D';
 
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata = {
-  title: 'Cressets | Personal Cloud',
-  description: 'Secure, 3D Web Storage',
+  title: '내 클라우드 | 개인 웹하드',
+  description: '안전하고 빠른 개인 클라우드 스토리지',
 };
 
 export default function RootLayout({
@@ -15,13 +14,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
-        <Background3D />
-        <main className="relative z-10 min-h-screen flex flex-col">
-          {children}
-        </main>
-      </body>
+    <html lang="ko">
+      <body className={inter.className}>{children}</body>
     </html>
   );
 }
