@@ -32,7 +32,7 @@ export const translations = {
                 title: 'SoulGrid Platform',
                 desc_prefix: 'An integrated productivity and social networking platform combining personal journaling, project management, and interest-based matching.',
                 desc_deploy: 'On-Premise Deployment:',
-                desc_deploy_text: 'Hosted on a self-managed Mac Mini M4 cluster using Docker for container orchestration. Implemented a complete Self-Hosted CI/CD pipeline with GitHub Actions Runners to manage the full lifecycle from development to production, ensuring data sovereignty and deep infrastructure control.',
+                desc_deploy_text: 'Hosted on a self-managed Mac Mini M4 cluster using Docker for container orchestration. Implemented a complete Self-Hosted CI/CD pipeline with Jenkins to manage the full lifecycle from development to production, ensuring data sovereignty and deep infrastructure control.',
                 link: 'View on GitHub'
             },
             birdchain: {
@@ -127,7 +127,7 @@ export const translations = {
                 title: 'SoulGrid 플랫폼',
                 desc_prefix: '개인 저널링, 프로젝트 관리, 관심사 기반 매칭을 결합한 통합 생산성 및 소셜 네트워킹 플랫폼입니다.',
                 desc_deploy: '온프레미스 배포:',
-                desc_deploy_text: 'Docker 기반 컨테이너 오케스트레이션을 사용하여 Mac Mini M4 클러스터에 자체 호스팅 환경을 구축했습니다. GitHub Actions Self-hosted Runner를 통해 개발부터 운영까지 전체 라이프사이클을 관리하는 CI/CD 파이프라인을 구현하여 데이터 주권과 인프라 통제권을 확보했습니다.',
+                desc_deploy_text: 'Docker 기반 컨테이너 오케스트레이션을 사용하여 Mac Mini M4 클러스터에 자체 호스팅 환경을 구축했습니다. Jenkins를 통해 개발부터 운영까지 전체 라이프사이클을 관리하는 CI/CD 파이프라인을 구현하여 데이터 주권과 인프라 통제권을 확보했습니다.',
                 link: 'GitHub에서 보기'
             },
             birdchain: {
