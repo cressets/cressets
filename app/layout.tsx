@@ -4,8 +4,8 @@ import { Inter } from 'next/font/google';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata = {
-  title: '내 클라우드 | 개인 웹하드',
-  description: '안전하고 빠른 개인 클라우드 스토리지',
+  title: 'Developer Portfolio',
+  description: 'Sojin Kim: Developer',
 };
 
 export default function RootLayout({
