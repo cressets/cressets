@@ -192,7 +192,7 @@ export default function PortfolioPage() {
                 <li>Blockchain & Smart Contract Development</li>
                 <li>Full-Stack Web Development (React, Next.js)</li>
                 <li>Database Design & Optimization</li>
-                <li>On-Premise Infrastructure & Container Orchestration (Mac Mini M4)</li>
+                <li>On-Premise Infrastructure & Container Orchestration</li>
                 <li>Cloud Infrastructure & DevOps</li>
               </ul>
             </div>
