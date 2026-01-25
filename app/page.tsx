@@ -298,7 +298,7 @@ export default function PortfolioPage() {
               <span className="tech-tag">Web3</span>
             </div>
             <a
-              href="https://github.com/tail-s"
+              href="https://github.com/soulgrid"
               target="_blank"
               rel="noopener noreferrer"
               className="project-link"
