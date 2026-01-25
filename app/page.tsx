@@ -2,31 +2,17 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, X, Command, Cloud, Shield, Zap } from 'lucide-react';
+import { ArrowRight, Github, Instagram, Linkedin, ChevronDown, ExternalLink, X, Command, Menu } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
+import './portfolio.css';
 
-export default function LandingPage() {
+export default function PortfolioPage() {
   const [showApiModal, setShowApiModal] = useState(false);
   const [apiKey, setApiKey] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const router = useRouter();
-
-  useEffect(() => {
-    // 강제로 body 스타일 지정 (최후의 수단)
-    document.body.style.display = 'flex';
-    document.body.style.justifyContent = 'center';
-    document.body.style.alignItems = 'center';
-    document.body.style.minHeight = '100vh';
-    document.body.style.margin = '0';
-    document.body.style.overflowX = 'hidden';
-
-    return () => {
-      document.body.style.display = '';
-      document.body.style.justifyContent = '';
-      document.body.style.alignItems = '';
-    };
-  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,102 +38,381 @@ export default function LandingPage() {
     }
   };
 
+  const scrollToSection = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+    setMobileMenuOpen(false);
+  };
+
   return (
-    <div className="relative w-full h-full flex flex-col items-center justify-center font-sans">
-
-      {/* 1. 배경 */}
-      <div className="fixed inset-0 w-screen h-screen z-[-1] pointer-events-none bg-black">
-        <div className="absolute inset-0 aurora-gradient opacity-60"></div>
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_80%_80%_at_50%_50%,#000_10%,transparent_100%)]"></div>
-      </div>
-
-      {/* 2. 네비게이션 - 중앙 고정 */}
-      <div className="fixed top-8 left-1/2 -translate-x-1/2 z-50">
-        <div className="glass-card px-8 py-3 rounded-full flex items-center gap-3 shadow-2xl shadow-cyan-900/10">
-          <div className="bg-cyan-500/10 p-2 rounded-lg border border-cyan-500/20">
-            <Command size={20} className="text-cyan-400" />
-          </div>
-          <span className="text-sm font-bold tracking-[0.2em] text-white">CRESSETS</span>
+    <div className="portfolio-page">
+      {/* Navigation */}
+      <nav className="portfolio-nav">
+        <div className="nav-logo">Sojin Kim</div>
+        <div className="nav-links">
+          <button onClick={() => scrollToSection('about')} className="nav-link">About</button>
+          <button onClick={() => scrollToSection('projects')} className="nav-link">Projects</button>
+          <button onClick={() => scrollToSection('insights')} className="nav-link">Insights</button>
+          <button onClick={() => scrollToSection('contact')} className="nav-link">Contact</button>
+          <button onClick={() => setShowApiModal(true)} className="nav-link" style={{ color: 'var(--color-primary)' }}>
+            Cressets →
+          </button>
         </div>
-      </div>
-
-      {/* 3. 메인 콘텐츠 - Absolute Centering으로 강제 중앙 정렬 */}
-      <main className="fixed top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] w-full max-w-[1200px] px-6 z-10 flex flex-col items-center justify-center text-center">
-
-        {/* Version Badge */}
-        <div className="mb-10 mx-auto glass-card px-5 py-2 rounded-full flex items-center justify-center gap-3 animate-float border-cyan-500/20 bg-cyan-900/5 min-w-max">
-          <span className="relative flex h-2.5 w-2.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-500"></span>
-          </span>
-          <span className="text-xs font-bold text-cyan-200 uppercase tracking-[0.2em]">
-            System Operational
-          </span>
-        </div>
-
-        {/* Headline */}
-        <h1 className="w-full text-5xl md:text-7xl lg:text-8xl font-black mb-8 tracking-tighter leading-[1.05] text-white drop-shadow-2xl mx-auto">
-          Redefining<br />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-500 to-indigo-500 text-glow filter drop-shadow-lg inline-block py-2">
-            Digital Freedom
-          </span>
-        </h1>
-
-        {/* Description */}
-        <p className="w-full text-lg md:text-2xl text-slate-300 max-w-3xl mb-14 leading-relaxed font-light text-glow-subtle mx-auto px-4">
-          압도적인 속도와 강력한 보안.<br className="hidden sm:block" />
-          당신의 데이터를 위한 가장 안전한 공간을 경험하세요.
-        </p>
-
-        {/* Feature Icons */}
-        <div className="w-full flex justify-center gap-8 sm:gap-16 mb-16 mx-auto">
-          <div className="flex flex-col items-center gap-3 group">
-            <div className="p-4 rounded-2xl bg-white/5 border border-white/5 group-hover:border-cyan-500/30 group-hover:bg-cyan-500/10 transition-colors">
-              <Shield size={28} className="text-cyan-400 group-hover:scale-110 transition-transform duration-300" />
-            </div>
-            <span className="text-[10px] font-bold text-cyan-200/50 uppercase tracking-[0.2em] group-hover:text-cyan-200 transition-colors">Secure</span>
-          </div>
-          <div className="flex flex-col items-center gap-3 group">
-            <div className="p-4 rounded-2xl bg-white/5 border border-white/5 group-hover:border-blue-500/30 group-hover:bg-blue-500/10 transition-colors">
-              <Zap size={28} className="text-blue-400 group-hover:scale-110 transition-transform duration-300" />
-            </div>
-            <span className="text-[10px] font-bold text-blue-200/50 uppercase tracking-[0.2em] group-hover:text-blue-200 transition-colors">Fast</span>
-          </div>
-          <div className="flex flex-col items-center gap-3 group">
-            <div className="p-4 rounded-2xl bg-white/5 border border-white/5 group-hover:border-purple-500/30 group-hover:bg-purple-500/10 transition-colors">
-              <Cloud size={28} className="text-purple-400 group-hover:scale-110 transition-transform duration-300" />
-            </div>
-            <span className="text-[10px] font-bold text-purple-200/50 uppercase tracking-[0.2em] group-hover:text-purple-200 transition-colors">Unified</span>
-          </div>
-        </div>
-
-        {/* Action Button */}
-        <button
-          onClick={() => setShowApiModal(true)}
-          className="mx-auto btn-premium group relative px-12 py-5 rounded-full font-bold text-lg flex items-center gap-3 z-30 overflow-hidden shadow-[0_0_40px_rgba(255,255,255,0.1)] hover:shadow-[0_0_60px_rgba(6,182,212,0.4)] transition-all duration-500 hover:scale-105 active:scale-95 cursor-pointer"
+        <button 
+          className="mobile-menu-btn"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          style={{ display: 'none' }}
         >
-          <span className="relative z-10 tracking-wide text-slate-900">Get Started</span>
-          <ArrowRight size={20} className="relative z-10 text-slate-900 group-hover:translate-x-1.5 transition-transform duration-300" />
-          <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-30 transition-opacity duration-300" />
+          <Menu size={24} />
         </button>
-      </main>
+      </nav>
+
+      {/* Hero Section */}
+      <section className="hero-section">
+        <div className="hero-content">
+          <p className="hero-tagline">Full-Stack Developer • Seoul, Korea</p>
+          <h1 className="hero-title">
+            Building <em>Thoughtful</em><br />
+            Digital Experiences
+          </h1>
+          <p className="hero-description">
+            I enjoy bringing ideas to life through development. With a strong interest 
+            in blockchain, Web3, and security, I focus on creating robust and 
+            meaningful solutions that bridge innovation with practicality.
+          </p>
+          <button onClick={() => scrollToSection('projects')} className="hero-cta">
+            View Projects <ArrowRight size={16} />
+          </button>
+        </div>
+        <div className="hero-visual">
+          <div className="hero-image-container">
+            <div 
+              className="hero-image" 
+              style={{ 
+                background: 'linear-gradient(135deg, #8B7355 0%, #A68B6A 50%, #6B5744 100%)',
+                height: '500px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'white',
+                fontFamily: "'Cormorant Garamond', serif"
+              }}
+            >
+              <div style={{ fontSize: '4rem', fontWeight: 300, marginBottom: '1rem' }}>SK</div>
+              <div style={{ fontSize: '0.9rem', letterSpacing: '0.3em', textTransform: 'uppercase', opacity: 0.8 }}>
+                Developer
+              </div>
+            </div>
+            <div className="hero-image-frame"></div>
+          </div>
+        </div>
+      </section>
+
+      {/* About Section */}
+      <section id="about" className="section about-section">
+        <div className="section-header">
+          <p className="section-label">About Me</p>
+          <h2 className="section-title">Background & Experience</h2>
+        </div>
+        
+        <div className="about-grid">
+          <div className="about-intro">
+            I take pleasure in imagining business concepts and transforming them into 
+            reality. Though my professional experience is still growing, I'm actively 
+            learning through training programs led by top companies in each field.
+          </div>
+          
+          <div className="about-details">
+            <div className="about-block">
+              <h3>Core Skills</h3>
+              <ul>
+                <li>Java & Spring Boot Ecosystem</li>
+                <li>Blockchain & Smart Contract Development</li>
+                <li>Full-Stack Web Development (React, Next.js)</li>
+                <li>Database Design & Optimization</li>
+                <li>Cloud Infrastructure & DevOps</li>
+              </ul>
+            </div>
+            
+            <div className="about-block">
+              <h3>Certifications</h3>
+              <ul>
+                <li>정보처리기사 (Engineer Information Processing)</li>
+                <li>블록체인 통합 기본과정 II 수료</li>
+                <li>Samsung SW Academy For Youth (SSAFY)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div style={{ marginTop: '4rem' }}>
+          <h3 style={{ 
+            fontSize: '0.75rem', 
+            fontWeight: 600, 
+            letterSpacing: '0.15em', 
+            textTransform: 'uppercase', 
+            color: 'var(--color-primary)',
+            marginBottom: '2rem'
+          }}>
+            Experience
+          </h3>
+          
+          <div className="experience-list">
+            <div className="experience-item">
+              <div className="experience-date">2025 - Present</div>
+              <div className="experience-content">
+                <h4>Public Financial System Operator</h4>
+                <p className="company">Korea Fiscal Information Service</p>
+                <p>Financial closing and ledger management, maintaining accrual-based double-entry 
+                accounting ledgers and ensuring data pipeline stability.</p>
+              </div>
+            </div>
+            
+            <div className="experience-item">
+              <div className="experience-date">2024</div>
+              <div className="experience-content">
+                <h4>DeFi Protocol Auditor (Trainee)</h4>
+                <p className="company">Dunamu & Theori</p>
+                <p>Code-level analysis of Compound Protocol, Venus Protocol Isolated Pool, 
+                and Cyan audit with invariant checks.</p>
+              </div>
+            </div>
+            
+            <div className="experience-item">
+              <div className="experience-date">2024</div>
+              <div className="experience-content">
+                <h4>Freelance AI Trainer</h4>
+                <p className="company">EBIT</p>
+                <p>Training generative AI models through coding projects in SQL, Python, Java, 
+                JavaScript, and TypeScript.</p>
+              </div>
+            </div>
+            
+            <div className="experience-item">
+              <div className="experience-date">2023</div>
+              <div className="experience-content">
+                <h4>Solutions Developer</h4>
+                <p className="company">Wooam Corporation (BlueWorks)</p>
+                <p>Maintained and developed new features for Document Conference Solution 'SmartPlace'.</p>
+              </div>
+            </div>
+            
+            <div className="experience-item">
+              <div className="experience-date">2022 - 2023</div>
+              <div className="experience-content">
+                <h4>Java Track Trainee (1600H)</h4>
+                <p className="company">Samsung SW Academy For Youth (SSAFY) 8th</p>
+                <p>Intensive training in algorithms, web development with Spring Boot, MySQL, 
+                Vue.js, and completed 3 major team projects.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Projects Section */}
+      <section id="projects" className="section projects-section">
+        <div className="section-header">
+          <p className="section-label">Selected Work</p>
+          <h2 className="section-title">Projects</h2>
+        </div>
+
+        {/* Featured Project - SoulGrid */}
+        <div className="project-featured">
+          <div className="project-image">
+            SoulGrid
+          </div>
+          <div className="project-content">
+            <span className="project-label">Featured Project</span>
+            <h3 className="project-title">SoulGrid Platform</h3>
+            <p className="project-description">
+              An integrated productivity and social networking platform combining personal journaling, 
+              project management, and interest-based matching. Built with a microservices architecture 
+              that prioritizes scalability, security, and developer experience.
+            </p>
+            <div className="project-tech">
+              <span className="tech-tag">Spring Cloud</span>
+              <span className="tech-tag">Next.js 15</span>
+              <span className="tech-tag">MySQL</span>
+              <span className="tech-tag">MongoDB</span>
+              <span className="tech-tag">Redis</span>
+              <span className="tech-tag">RabbitMQ</span>
+              <span className="tech-tag">Solidity</span>
+              <span className="tech-tag">Web3</span>
+            </div>
+            <a 
+              href="https://github.com/tail-s" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="project-link"
+            >
+              View on GitHub <ExternalLink size={14} />
+            </a>
+          </div>
+        </div>
+
+        {/* Other Projects Grid */}
+        <div className="projects-grid">
+          <div className="project-card">
+            <h4 className="project-card-title">BirdChain</h4>
+            <p className="project-card-role">Blockchain Developer / Team Leader</p>
+            <p className="project-card-desc">
+              NFT platform promoting endangered birds awareness. Implemented smart contracts 
+              with Web3.js and managed NFT metadata on IPFS.
+            </p>
+            <div className="project-tech" style={{ marginTop: '1rem' }}>
+              <span className="tech-tag">Solidity</span>
+              <span className="tech-tag">Vue.js</span>
+              <span className="tech-tag">IPFS</span>
+            </div>
+          </div>
+          
+          <div className="project-card">
+            <h4 className="project-card-title">Persona</h4>
+            <p className="project-card-role">Frontend Lead / Team Leader</p>
+            <p className="project-card-desc">
+              Community platform for AI-powered acting performance analysis using Mediapipe 
+              and Tensorflow.js for real-time feedback.
+            </p>
+            <div className="project-tech" style={{ marginTop: '1rem' }}>
+              <span className="tech-tag">React.js</span>
+              <span className="tech-tag">FastAPI</span>
+              <span className="tech-tag">TensorFlow</span>
+            </div>
+          </div>
+          
+          <div className="project-card">
+            <h4 className="project-card-title">Plands</h4>
+            <p className="project-card-role">Backend Developer</p>
+            <p className="project-card-desc">
+              Real-time video conference and collaborative planner with Spring Security, 
+              JWT authentication, and OpenVidu integration.
+            </p>
+            <div className="project-tech" style={{ marginTop: '1rem' }}>
+              <span className="tech-tag">Spring Boot</span>
+              <span className="tech-tag">OpenVidu</span>
+              <span className="tech-tag">Y.js</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Technical Insights Section */}
+      <section id="insights" className="section insights-section">
+        <div className="section-header">
+          <p className="section-label">Technical Depth</p>
+          <h2 className="section-title">Design Philosophy</h2>
+        </div>
+
+        <div className="insights-grid">
+          <div className="insight-card">
+            <div className="insight-number">01</div>
+            <h4 className="insight-title">Microservices Architecture</h4>
+            <p className="insight-desc">
+              Designed services around domain boundaries using DDD principles. Each service 
+              (User, Post, Date, Manage) operates independently with its own data store, 
+              enabling independent deployment and scaling while maintaining loose coupling.
+            </p>
+          </div>
+          
+          <div className="insight-card">
+            <div className="insight-number">02</div>
+            <h4 className="insight-title">Hybrid Authentication</h4>
+            <p className="insight-desc">
+              Implemented JWT-based stateless authentication with HttpOnly cookies for XSS 
+              protection. Integrated Web3 wallet login using ECDSA signature verification, 
+              bridging traditional and decentralized identity systems.
+            </p>
+          </div>
+          
+          <div className="insight-card">
+            <div className="insight-number">03</div>
+            <h4 className="insight-title">Polyglot Persistence</h4>
+            <p className="insight-desc">
+              Strategic database selection: MySQL for transactional data, MongoDB for flexible 
+              schemas (chat, profiles), and Redis for caching and session management. Each 
+              choice optimized for specific access patterns and consistency requirements.
+            </p>
+          </div>
+          
+          <div className="insight-card">
+            <div className="insight-number">04</div>
+            <h4 className="insight-title">Resilient Infrastructure</h4>
+            <p className="insight-desc">
+              Spring Cloud ecosystem with Eureka for service discovery, Config Server for 
+              centralized configuration, and RabbitMQ Bus for hot-reload capabilities. 
+              API Gateway handles cross-cutting concerns and prevents single points of failure.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Contact Section */}
+      <section id="contact" className="section contact-section">
+        <h2 className="contact-title">Let's Connect</h2>
+        <p className="contact-subtitle">
+          Open to discussing new opportunities and interesting projects.
+        </p>
+        
+        <div className="contact-links">
+          <a 
+            href="https://github.com/tail-s" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="contact-link"
+          >
+            <div className="contact-icon">
+              <Github size={22} />
+            </div>
+            <span className="contact-label">GitHub</span>
+          </a>
+          
+          <a 
+            href="https://www.instagram.com/dev_mode_" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="contact-link"
+          >
+            <div className="contact-icon">
+              <Instagram size={22} />
+            </div>
+            <span className="contact-label">Instagram</span>
+          </a>
+          
+          <a 
+            href="https://www.linkedin.com/in/oliverslife" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="contact-link"
+          >
+            <div className="contact-icon">
+              <Linkedin size={22} />
+            </div>
+            <span className="contact-label">LinkedIn</span>
+          </a>
+        </div>
+      </section>
 
       {/* Footer */}
-      <footer className="fixed bottom-8 left-1/2 -translate-x-1/2 text-center z-10 pointer-events-none w-full">
-        <p className="text-slate-500 text-[10px] uppercase tracking-[0.4em] font-medium opacity-70">
-          Secured by Cressets &copy; 2026
-        </p>
+      <footer className="portfolio-footer">
+        <span>© 2026 Sojin Kim. All rights reserved.</span>
+        <span>Seoul, South Korea</span>
       </footer>
 
-      {/* Modal */}
+      {/* Cressets Login Modal */}
       <AnimatePresence>
         {showApiModal && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}>
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/80 backdrop-blur-xl"
+              style={{ 
+                position: 'absolute', 
+                inset: 0, 
+                backgroundColor: 'rgba(0,0,0,0.7)', 
+                backdropFilter: 'blur(8px)' 
+              }}
               onClick={() => setShowApiModal(false)}
             />
             <motion.div
@@ -155,47 +420,86 @@ export default function LandingPage() {
               animate={{ scale: 1, y: 0, opacity: 1 }}
               exit={{ scale: 0.95, y: 20, opacity: 0 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="glass-card w-full max-w-md p-10 rounded-[2rem] relative overflow-hidden bg-[#0A0A0F] mx-4 shadow-2xl z-[101]"
+              style={{
+                position: 'relative',
+                width: '100%',
+                maxWidth: '420px',
+                padding: '2.5rem',
+                background: 'var(--color-bg-alt)',
+                borderRadius: '1rem',
+                margin: '1rem',
+                boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',
+                zIndex: 101
+              }}
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Top Accent Line */}
-              <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 shadow-[0_0_20px_rgba(6,182,212,0.5)]"></div>
+              <div style={{ 
+                position: 'absolute', 
+                top: 0, 
+                left: 0, 
+                right: 0, 
+                height: '3px', 
+                background: 'linear-gradient(90deg, var(--color-primary), var(--color-accent))' 
+              }} />
 
-              <div className="flex justify-between items-start mb-10">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '2rem' }}>
                 <div>
-                  <h2 className="text-3xl font-bold text-white mb-2">Access</h2>
-                  <p className="text-xs text-slate-400 uppercase tracking-widest font-medium">Private Gateway</p>
+                  <h2 style={{ fontSize: '1.75rem', fontWeight: 600, color: 'var(--color-text)', fontFamily: "'Cormorant Garamond', serif" }}>Cressets</h2>
+                  <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>File Management System</p>
                 </div>
                 <button
                   onClick={() => setShowApiModal(false)}
-                  className="p-2 -mr-2 -mt-2 rounded-full hover:bg-white/5 text-slate-500 hover:text-white transition-colors cursor-pointer"
+                  style={{ 
+                    padding: '0.5rem', 
+                    background: 'transparent', 
+                    border: 'none', 
+                    cursor: 'pointer',
+                    color: 'var(--color-text-muted)'
+                  }}
                 >
-                  <X size={24} />
+                  <X size={20} />
                 </button>
               </div>
 
-              <form onSubmit={handleLogin} className="space-y-8">
+              <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                 <div>
-                  <div className="relative group">
-                    <input
-                      type="password"
-                      value={apiKey}
-                      onChange={(e) => setApiKey(e.target.value)}
-                      className="input-glass w-full px-5 py-5 rounded-2xl text-white text-xl outline-none font-mono tracking-[0.2em] placeholder:text-slate-700 placeholder:tracking-normal placeholder:font-sans text-center bg-black/50 border-white/5 focus:border-cyan-500/50 transition-all duration-300"
-                      placeholder="ENTER API KEY"
-                      autoFocus
-                    />
-                    <div className="absolute inset-x-0 -bottom-px h-[1px] bg-gradient-to-r from-transparent via-cyan-500 to-transparent opacity-0 group-focus-within:opacity-100 transition-opacity duration-500 shadow-[0_0_10px_rgba(6,182,212,1)]"></div>
-                  </div>
+                  <input
+                    type="password"
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '1rem 1.25rem',
+                      background: 'var(--color-bg)',
+                      border: '1px solid var(--color-border)',
+                      borderRadius: '0.5rem',
+                      fontSize: '1rem',
+                      fontFamily: 'monospace',
+                      letterSpacing: '0.1em',
+                      textAlign: 'center',
+                      outline: 'none',
+                      transition: 'border-color 0.3s',
+                      color: 'var(--color-text)'
+                    }}
+                    placeholder="Enter API Key"
+                    autoFocus
+                  />
                 </div>
 
                 {error && (
                   <motion.div
                     initial={{ opacity: 0, y: -5 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="text-red-400 text-sm font-medium text-center bg-red-950/30 py-3 rounded-xl border border-red-500/10 flex items-center justify-center gap-2"
+                    style={{
+                      padding: '0.75rem',
+                      background: '#FEF2F2',
+                      border: '1px solid #FEE2E2',
+                      borderRadius: '0.5rem',
+                      fontSize: '0.875rem',
+                      color: '#DC2626',
+                      textAlign: 'center'
+                    }}
                   >
-                    <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
                     {error}
                   </motion.div>
                 )}
@@ -203,9 +507,22 @@ export default function LandingPage() {
                 <button
                   type="submit"
                   disabled={loading || !apiKey}
-                  className="w-full py-5 bg-gradient-to-r from-cyan-600 to-blue-600 rounded-2xl text-white font-bold text-lg hover:shadow-[0_0_30px_rgba(6,182,212,0.3)] hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg border border-white/10 cursor-pointer"
+                  style={{
+                    width: '100%',
+                    padding: '1rem',
+                    background: 'var(--color-primary)',
+                    border: 'none',
+                    borderRadius: '0.5rem',
+                    color: 'white',
+                    fontSize: '0.875rem',
+                    fontWeight: 500,
+                    letterSpacing: '0.05em',
+                    cursor: loading || !apiKey ? 'not-allowed' : 'pointer',
+                    opacity: loading || !apiKey ? 0.6 : 1,
+                    transition: 'all 0.3s'
+                  }}
                 >
-                  {loading ? 'Authenticating...' : 'Connect System'}
+                  {loading ? 'Authenticating...' : 'Access System'}
                 </button>
               </form>
             </motion.div>
