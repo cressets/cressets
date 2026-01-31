@@ -12,6 +12,15 @@ export default function PortfolioPage() {
   const [lang, setLang] = useState<'en' | 'ko'>('en'); // Default to English
   const [activeSoulGridImg, setActiveSoulGridImg] = useState('/images/soulgrid_landing.png');
   const [showApiModal, setShowApiModal] = useState(false);
+  const [heroImageFlipped, setHeroImageFlipped] = useState(false);
+
+  // Auto-rotate hero image every 4 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setHeroImageFlipped(prev => !prev);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
   const [apiKey, setApiKey] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -103,6 +112,45 @@ export default function PortfolioPage() {
     { src: '/images/soulgrid_backlog.png', alt: 'Project Backlog', title: 'Backlog' }
   ];
 
+  // PLANDS - 여행계획 서비스
+  const plandsImages = [
+    { src: '/images/plands/mainfeat.png', alt: 'Main Features', title: 'Features' },
+    { src: '/images/plands/gi1.gif', alt: 'Main Page Demo', title: 'Main' },
+    { src: '/images/plands/gi2.gif', alt: 'Travel Plan', title: 'Planning' },
+    { src: '/images/plands/gi3.gif', alt: 'WebRTC Demo', title: 'WebRTC' },
+    { src: '/images/plands/architecture.png', alt: 'Architecture', title: 'Arch' }
+  ];
+
+  // Persona - 연기 연습 서비스
+  const personaImages = [
+    { src: '/images/persona/007.png', alt: 'Main Feature', title: 'Main' },
+    { src: '/images/persona/008.png', alt: 'Emotion Analysis', title: 'AI Analysis' },
+    { src: '/images/persona/009.png', alt: 'Speech Recognition', title: 'Speech' },
+    { src: '/images/persona/012.png', alt: 'Script Analysis', title: 'Script' }
+  ];
+
+  // Birdchain - NFT 기부 서비스
+  const birdchainImages = [
+    { src: '/images/birdchain/image5.png', alt: 'Bird Info', title: 'Info' },
+    { src: '/images/birdchain/image6.png', alt: 'Bird Strike Map', title: 'Map' },
+    { src: '/images/birdchain/image7.png', alt: 'NFT Donation', title: 'NFT' }
+  ];
+
+  // DeFi Audit - Dunamu & Theori
+  const defiAuditImages = [
+    { src: '/images/defi-audit/invariant_compound.png', alt: 'Lending Invariant via Compound', title: 'Invariant' },
+    { src: '/images/defi-audit/invariant_checklist.png', alt: 'Invariant Checklist', title: 'Checklist' },
+    { src: '/images/defi-audit/threat_modeling.png', alt: 'Threat Modeling Diagram', title: 'Threat Model' },
+    { src: '/images/defi-audit/audit_analysis.png', alt: 'Audit Analysis', title: 'Analysis' },
+    { src: '/images/defi-audit/invariant_validation.png', alt: 'Invariant Validation', title: 'Validation' }
+  ];
+
+  // Active image states for each project
+  const [activePlandsImg, setActivePlandsImg] = useState(plandsImages[0].src);
+  const [activePersonaImg, setActivePersonaImg] = useState(personaImages[0].src);
+  const [activeBirdchainImg, setActiveBirdchainImg] = useState(birdchainImages[0].src);
+  const [activeDefiAuditImg, setActiveDefiAuditImg] = useState(defiAuditImages[0].src);
+
   return (
     <div className="portfolio-page">
       {/* Navigation */}
@@ -150,21 +198,39 @@ export default function PortfolioPage() {
         <div className="hero-visual">
           <div className="hero-image-container">
             <div
-              className="hero-image"
-              style={{
-                background: 'linear-gradient(135deg, #8B7355 0%, #A68B6A 50%, #6B5744 100%)',
-                height: '500px',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'white',
-                fontFamily: "'Cormorant Garamond', serif"
-              }}
+              className={`hero-flip-card ${heroImageFlipped ? 'flipped' : ''}`}
+              onClick={() => setHeroImageFlipped(prev => !prev)}
             >
-              <div style={{ fontSize: '4rem', fontWeight: 300, marginBottom: '1rem' }}>SK</div>
-              <div style={{ fontSize: '0.9rem', letterSpacing: '0.3em', textTransform: 'uppercase', opacity: 0.8 }}>
-                {t.hero.role}
+              {/* Front: SK Logo */}
+              <div className="hero-flip-card-front">
+                <div className="hero-image" style={{
+                  background: 'linear-gradient(135deg, #8B7355 0%, #A68B6A 50%, #6B5744 100%)',
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white',
+                  fontFamily: "'Cormorant Garamond', serif"
+                }}>
+                  <div style={{ fontSize: '4rem', fontWeight: 300, marginBottom: '1rem' }}>SK</div>
+                  <div style={{ fontSize: '0.9rem', letterSpacing: '0.3em', textTransform: 'uppercase', opacity: 0.8 }}>
+                    {t.hero.role}
+                  </div>
+                </div>
+              </div>
+              {/* Back: Developer Photo */}
+              <div className="hero-flip-card-back">
+                <Image
+                  src="/images/developer_photo.jpg"
+                  alt="Sojin Kim - Developer"
+                  fill
+                  style={{ objectFit: 'cover', objectPosition: 'center top' }}
+                  priority
+                />
+                <div className="hero-photo-overlay">
+                  <span>{t.hero.role}</span>
+                </div>
               </div>
             </div>
             <div className="hero-image-frame"></div>
@@ -277,8 +343,9 @@ export default function PortfolioPage() {
             </div>
           </div>
           <div className="project-content">
-            <span className="project-label">{t.projects.featured_label}</span>
+            <span className="project-label">{t.projects.featured_label} · 2025.11 - 2025.12</span>
             <h3 className="project-title">{t.projects.soulgrid.title}</h3>
+            <p className="project-card-role">Solo Development (1인 개발)</p>
             <p className="project-description">
               {t.projects.soulgrid.desc_prefix}
               <br /><br />
@@ -308,38 +375,206 @@ export default function PortfolioPage() {
           </div>
         </div>
 
-        {/* Other Projects Grid */}
-        <div className="projects-grid">
-          <div className="project-card">
-            <h4 className="project-card-title">{t.projects.birdchain.title}</h4>
-            <p className="project-card-role">{t.projects.birdchain.role}</p>
-            <p className="project-card-desc">{t.projects.birdchain.desc}</p>
-            <div className="project-tech" style={{ marginTop: '1rem' }}>
+        {/* DeFi Audit Project - 24.09 ~ 24.10 */}
+        <div className="project-featured project-featured-alt">
+          <div className="project-content">
+            <span className="project-label">Dunamu & Theori · 2024.09 - 2024.10</span>
+            <h3 className="project-title">DeFi Lending Protocol Audit</h3>
+            <p className="project-card-role">Team Member</p>
+            <p className="project-description">
+              Code Level Analysis of Compound Protocol&apos;s Deposit, Withdrawal, Loan, Repayment, and Liquidation Functions.
+              <br /><br />
+              Venus Protocol Isolated Pool, Cyan Audit and Invariant Check. Analyzed <b>352 findings</b> from various lending protocol audits.
+            </p>
+            <div className="project-tech">
+              <span className="tech-tag" style={{ borderColor: 'var(--color-primary)', color: 'var(--color-primary)' }}>DeFi Audit</span>
+              <span className="tech-tag">Compound Protocol</span>
+              <span className="tech-tag">Venus Protocol</span>
               <span className="tech-tag">Solidity</span>
-              <span className="tech-tag">Vue.js</span>
-              <span className="tech-tag">IPFS</span>
+              <span className="tech-tag">Invariant Testing</span>
+              <span className="tech-tag">Threat Modeling</span>
             </div>
           </div>
-
-          <div className="project-card">
-            <h4 className="project-card-title">{t.projects.persona.title}</h4>
-            <p className="project-card-role">{t.projects.persona.role}</p>
-            <p className="project-card-desc">{t.projects.persona.desc}</p>
-            <div className="project-tech" style={{ marginTop: '1rem' }}>
-              <span className="tech-tag">React.js</span>
-              <span className="tech-tag">FastAPI</span>
-              <span className="tech-tag">TensorFlow</span>
+          <div className="project-image">
+            <div className="project-gallery">
+              <div className="project-main-container">
+                <Image
+                  src={activeDefiAuditImg}
+                  alt="DeFi Audit Feature"
+                  className="project-main-img"
+                  width={800}
+                  height={500}
+                  unoptimized
+                />
+              </div>
+              <div className="project-sub-imgs">
+                {defiAuditImages.map((img) => (
+                  <div
+                    key={img.src}
+                    className={`thumb-container ${activeDefiAuditImg === img.src ? 'active' : ''}`}
+                    onClick={() => setActiveDefiAuditImg(img.src)}
+                  >
+                    <Image
+                      src={img.src}
+                      alt={img.alt}
+                      title={img.title}
+                      width={200}
+                      height={120}
+                      unoptimized
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
+        </div>
 
-          <div className="project-card">
-            <h4 className="project-card-title">{t.projects.plands.title}</h4>
-            <p className="project-card-role">{t.projects.plands.role}</p>
-            <p className="project-card-desc">{t.projects.plands.desc}</p>
-            <div className="project-tech" style={{ marginTop: '1rem' }}>
+        {/* Birdchain Project - 23.04 ~ 23.05 */}
+        <div className="project-featured project-featured-alt">
+          <div className="project-content">
+            <span className="project-label">SSAFY Team Project · 2023.04 - 2023.05</span>
+            <h3 className="project-title">{t.projects.birdchain.title}</h3>
+            <p className="project-card-role">{t.projects.birdchain.role}</p>
+            <p className="project-description">{t.projects.birdchain.desc}</p>
+            <div className="project-tech">
+              <span className="tech-tag" style={{ borderColor: 'var(--color-primary)', color: 'var(--color-primary)' }}>Blockchain</span>
+              <span className="tech-tag">Solidity</span>
+              <span className="tech-tag">Vue.js 3.0</span>
               <span className="tech-tag">Spring Boot</span>
+              <span className="tech-tag">PWA</span>
+              <span className="tech-tag">Truffle</span>
+            </div>
+          </div>
+          <div className="project-image">
+            <div className="project-gallery">
+              <div className="project-main-container">
+                <Image
+                  src={activeBirdchainImg}
+                  alt="Birdchain Feature"
+                  className="project-main-img"
+                  width={800}
+                  height={500}
+                  unoptimized
+                />
+              </div>
+              <div className="project-sub-imgs project-sub-imgs-3">
+                {birdchainImages.map((img) => (
+                  <div
+                    key={img.src}
+                    className={`thumb-container ${activeBirdchainImg === img.src ? 'active' : ''}`}
+                    onClick={() => setActiveBirdchainImg(img.src)}
+                  >
+                    <Image
+                      src={img.src}
+                      alt={img.alt}
+                      title={img.title}
+                      width={200}
+                      height={120}
+                      unoptimized
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Persona Project - 23.02 ~ 23.04 */}
+        <div className="project-featured">
+          <div className="project-image">
+            <div className="project-gallery">
+              <div className="project-main-container">
+                <Image
+                  src={activePersonaImg}
+                  alt="Persona Feature"
+                  className="project-main-img"
+                  width={800}
+                  height={500}
+                  unoptimized
+                />
+              </div>
+              <div className="project-sub-imgs">
+                {personaImages.map((img) => (
+                  <div
+                    key={img.src}
+                    className={`thumb-container ${activePersonaImg === img.src ? 'active' : ''}`}
+                    onClick={() => setActivePersonaImg(img.src)}
+                  >
+                    <Image
+                      src={img.src}
+                      alt={img.alt}
+                      title={img.title}
+                      width={200}
+                      height={120}
+                      unoptimized
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="project-content">
+            <span className="project-label">SSAFY Team Project · 2023.02 - 2023.04</span>
+            <h3 className="project-title">{t.projects.persona.title}</h3>
+            <p className="project-card-role">{t.projects.persona.role}</p>
+            <p className="project-description">{t.projects.persona.desc}</p>
+            <div className="project-tech">
+              <span className="tech-tag">React.js</span>
+              <span className="tech-tag">Spring Boot</span>
+              <span className="tech-tag">TensorFlow</span>
+              <span className="tech-tag">Whisper AI</span>
+              <span className="tech-tag">Redis</span>
+              <span className="tech-tag">MySQL</span>
+            </div>
+          </div>
+        </div>
+
+        {/* PLANDS Project - 23.01 ~ 23.02 */}
+        <div className="project-featured project-featured-alt">
+          <div className="project-content">
+            <span className="project-label">SSAFY Team Project · 2023.01 - 2023.02</span>
+            <h3 className="project-title">{t.projects.plands.title}</h3>
+            <p className="project-card-role">{t.projects.plands.role}</p>
+            <p className="project-description">{t.projects.plands.desc}</p>
+            <div className="project-tech">
+              <span className="tech-tag">Spring Boot</span>
+              <span className="tech-tag">React.js</span>
               <span className="tech-tag">OpenVidu</span>
-              <span className="tech-tag">Y.js</span>
+              <span className="tech-tag">Y.js (CRDT)</span>
+              <span className="tech-tag">Redis</span>
+              <span className="tech-tag">JWT</span>
+            </div>
+          </div>
+          <div className="project-image">
+            <div className="project-gallery">
+              <div className="project-main-container">
+                <Image
+                  src={activePlandsImg}
+                  alt="PLANDS Feature"
+                  className="project-main-img"
+                  width={800}
+                  height={500}
+                  unoptimized
+                />
+              </div>
+              <div className="project-sub-imgs">
+                {plandsImages.map((img) => (
+                  <div
+                    key={img.src}
+                    className={`thumb-container ${activePlandsImg === img.src ? 'active' : ''}`}
+                    onClick={() => setActivePlandsImg(img.src)}
+                  >
+                    <Image
+                      src={img.src}
+                      alt={img.alt}
+                      title={img.title}
+                      width={200}
+                      height={120}
+                      unoptimized
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
