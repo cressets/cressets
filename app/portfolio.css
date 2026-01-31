@@ -241,7 +241,7 @@
   position: relative;
   width: 100%;
   height: 500px;
-  cursor: pointer;
+  cursor: default;
   transform-style: preserve-3d;
   transition: transform 0.8s cubic-bezier(0.68, -0.6, 0.32, 1.6);
 }
@@ -485,6 +485,11 @@
 /* For projects with 3 images */
 .project-sub-imgs-3 {
   grid-template-columns: repeat(3, 1fr);
+}
+
+/* For projects with 4 images */
+.project-sub-imgs-4 {
+  grid-template-columns: repeat(4, 1fr);
 }
 
 /* Alternate layout - content on left, image on right */

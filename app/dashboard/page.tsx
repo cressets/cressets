@@ -200,53 +200,68 @@ export default function Dashboard() {
 
     return (
         <div
-            className="min-h-screen p-6 lg:p-10 font-[family-name:var(--font-inter)]"
-            style={{ backgroundColor: '#F5F0E8', color: '#2C2C2C' }}
+            className="min-h-screen p-6 lg:p-12 font-sans text-[#2C2C2C] bg-[#F4F1EA]"
+            style={{
+                backgroundImage: `
+                    radial-gradient(circle at 100% 0%, rgba(139, 115, 85, 0.08) 0%, transparent 25%),
+                    radial-gradient(circle at 0% 100%, rgba(139, 115, 85, 0.05) 0%, transparent 25%)
+                `
+            }}
             onDragEnter={handleDrag}
             onDragLeave={handleDrag}
             onDragOver={handleDrag}
             onDrop={handleDrop}
         >
+            <div className="fixed inset-0 pointer-events-none opacity-[0.03]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23000000\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }} />
+
             {/* Header */}
             <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-10"
+                className="relative z-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 mb-12"
             >
-                <div className="flex items-center gap-4">
-                    <div className="p-3 bg-white rounded-full shadow-sm border border-[#E0D8CC]">
-                        <HardDrive className="text-[#8B7355]" size={24} strokeWidth={1.5} />
+                <div className="flex items-center gap-6">
+                    <div className="p-4 bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] ring-1 ring-[#8B7355]/10">
+                        <HardDrive className="text-[#8B7355]" size={32} strokeWidth={1.5} />
                     </div>
                     <div>
-                        <h1 className="text-3xl lg:text-4xl font-light text-[#2C2C2C]" style={{ fontFamily: "serif" }}>Cressets</h1>
-                        <p className="text-[#6B6B6B] text-sm tracking-wider uppercase mt-1">File Management System</p>
+                        <h1 className="text-4xl font-light text-[#1A1A1A] tracking-tight" style={{ fontFamily: 'serif' }}>Cressets</h1>
+                        <div className="flex items-center gap-3 mt-2">
+                            <span className="h-px w-8 bg-[#8B7355]/40"></span>
+                            <p className="text-[#8B7355] text-xs font-bold tracking-[0.2em] uppercase">File Management System</p>
+                        </div>
                     </div>
                 </div>
 
                 <div className="flex items-center gap-6 w-full lg:w-auto">
-                    <div className="flex-1 lg:flex-none flex items-center gap-4 bg-white/50 p-3 rounded-lg border border-[#E0D8CC]">
-                        <div className="flex-1 lg:w-48">
-                            <div className="flex justify-between text-xs text-[#6B6B6B] mb-1.5 uppercase tracking-wider font-medium">
-                                <span>{formatSize(usage)} Used</span>
-                                <span>35 GB Limit</span>
+                    <div className="flex-1 lg:flex-none flex items-center gap-5 bg-white/60 backdrop-blur-md p-5 rounded-2xl border border-white/60 shadow-sm transition-all hover:shadow-md hover:bg-white/80">
+                        <div className="flex-1 lg:w-60">
+                            <div className="flex justify-between text-[11px] font-bold text-[#6B6B6B] mb-2 uppercase tracking-wider">
+                                <span>Storage Usage</span>
+                                <span className={usagePercent > 90 ? 'text-red-500' : 'text-[#8B7355]'}>{Math.round(usagePercent)}%</span>
                             </div>
-                            <div className="h-1.5 bg-[#E0D8CC] rounded-full overflow-hidden">
-                                <div
-                                    className="h-full rounded-full transition-all duration-500"
-                                    style={{
-                                        width: `${Math.min(usagePercent, 100)}%`,
-                                        backgroundColor: '#8B7355'
-                                    }}
-                                />
+                            <div className="h-2 bg-[#EAE5DE] rounded-full overflow-hidden">
+                                <motion.div
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${Math.min(usagePercent, 100)}%` }}
+                                    transition={{ duration: 1.2, ease: "easeOut" }}
+                                    className="h-full rounded-full bg-gradient-to-r from-[#8B7355] to-[#Cebfab] relative overflow-hidden"
+                                >
+                                    <div className="absolute inset-0 bg-white/20 animate-[shimmer_2s_infinite]" />
+                                </motion.div>
+                            </div>
+                            <div className="flex justify-between mt-2 text-[11px] font-medium text-[#8B7355]/80">
+                                <span>{formatSize(usage)} used</span>
+                                <span>35 GB total</span>
                             </div>
                         </div>
                     </div>
                     <button
                         onClick={() => router.push('/')}
-                        className="p-3 text-[#6B6B6B] hover:text-[#2C2C2C] hover:bg-white rounded-full transition-all border border-transparent hover:border-[#E0D8CC]"
+                        className="group p-4 text-[#6B6B6B] hover:text-[#8B7355] bg-white/60 hover:bg-white rounded-full transition-all border border-white/60 hover:border-[#8B7355]/20 shadow-sm hover:shadow-[0_8px_20px_rgb(139,115,85,0.15)]"
                         title="Logout"
                     >
-                        <LogOut size={20} strokeWidth={1.5} />
+                        <LogOut size={22} strokeWidth={1.5} className="group-hover:translate-x-0.5 transition-transform" />
                     </button>
                 </div>
             </motion.div>
@@ -273,65 +288,77 @@ export default function Dashboard() {
             </motion.div>
 
             {/* Toolbar */}
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="mb-8 flex flex-col lg:flex-row gap-4 items-stretch lg:items-center justify-between">
+            <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="relative z-10 mb-8 flex flex-col xl:flex-row gap-6 items-stretch xl:items-center justify-between bg-white/40 backdrop-blur-sm p-4 rounded-2xl border border-white/50 shadow-sm"
+            >
                 <div className="flex gap-3 flex-wrap">
                     {currentPath && (
                         <button
                             onClick={() => setCurrentPath(currentPath.split('/').slice(0, -1).join('/'))}
-                            className="flex items-center gap-2 px-4 py-2.5 bg-white border border-[#E0D8CC] text-[#2C2C2C] rounded-md hover:bg-[#FAF9F6] transition-all text-sm font-medium"
+                            className="flex items-center gap-2 px-5 py-3 bg-white border border-[#E5E0D8] text-[#5A5A5A] rounded-xl hover:bg-[#F9F7F2] hover:border-[#Cebfab] hover:text-[#8B7355] transition-all text-sm font-medium hover:shadow-sm"
                         >
-                            <ChevronLeft size={16} /> Back
+                            <ChevronLeft size={18} /> <span className="hidden sm:inline">Back</span>
                         </button>
                     )}
                     <button
                         onClick={() => fileInputRef.current?.click()}
                         disabled={uploading}
-                        className="flex items-center gap-2 px-5 py-2.5 bg-[#2C2C2C] text-white rounded-md hover:opacity-90 transition-all text-sm font-medium tracking-wide uppercase shadow-sm"
+                        className="flex items-center gap-2 px-6 py-3 bg-[#2C2C2C] text-white rounded-xl hover:bg-[#1a1a1a] hover:shadow-[0_4px_12px_rgba(0,0,0,0.15)] hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0 transition-all text-sm font-medium tracking-wide shadow-sm"
                     >
-                        <Upload size={16} /> {uploading ? 'Uploading...' : 'Upload File'}
+                        <Upload size={18} /> {uploading ? 'Uploading...' : 'Upload File'}
                     </button>
                     <button
                         onClick={() => setShowCreateFolder(true)}
-                        className="flex items-center gap-2 px-5 py-2.5 bg-white border border-[#E0D8CC] text-[#2C2C2C] rounded-md hover:border-[#8B7355] hover:text-[#8B7355] transition-all text-sm font-medium"
+                        className="flex items-center gap-2 px-6 py-3 bg-white border border-[#E5E0D8] text-[#5A5A5A] rounded-xl hover:border-[#8B7355]/50 hover:text-[#8B7355] hover:shadow-sm hover:-translate-y-0.5 transition-all text-sm font-medium"
                     >
-                        <FolderPlus size={16} /> New Folder
+                        <FolderPlus size={18} /> New Folder
                     </button>
                     <button
                         onClick={() => fetchFiles(currentPath)}
                         disabled={loading}
-                        className="p-2.5 bg-white border border-[#E0D8CC] text-[#6B6B6B] rounded-md hover:text-[#2C2C2C] transition-all"
+                        className="p-3 bg-white border border-[#E5E0D8] text-[#6B6B6B] rounded-xl hover:text-[#8B7355] hover:border-[#8B7355]/50 hover:shadow-sm transition-all"
                     >
-                        <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+                        <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
                     </button>
                 </div>
 
                 {/* Search & Sort */}
-                <div className="flex gap-3 items-center">
-                    <div className="relative group">
-                        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9B9B9B] group-focus-within:text-[#8B7355] transition-colors" />
+                <div className="flex gap-3 items-center flex-1 lg:flex-none justify-end">
+                    <div className="relative group w-full lg:w-72">
+                        <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#9B9B9B] group-focus-within:text-[#8B7355] transition-colors" />
                         <input
                             type="text"
-                            placeholder="Search files..."
+                            placeholder="Search your files..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="pl-10 pr-4 py-2.5 bg-white border border-[#E0D8CC] rounded-md text-sm text-[#2C2C2C] focus:border-[#8B7355] transition-all w-full lg:w-64 outline-none placeholder:text-[#BBB]"
+                            className="w-full pl-11 pr-5 py-3 bg-white border border-[#E5E0D8] rounded-xl text-sm text-[#2C2C2C] focus:border-[#8B7355]/50 focus:ring-4 focus:ring-[#8B7355]/5 transition-all outline-none placeholder:text-[#BBB] shadow-sm"
                         />
                     </div>
-                    <select
-                        value={sortBy}
-                        onChange={(e) => setSortBy(e.target.value as 'name' | 'size' | 'modified')}
-                        className="px-4 py-2.5 bg-white border border-[#E0D8CC] rounded-md text-sm text-[#2C2C2C] focus:border-[#8B7355] transition-all cursor-pointer outline-none"
-                    >
-                        <option value="name">Name</option>
-                        <option value="size">Size</option>
-                        <option value="modified">Date</option>
-                    </select>
-                    <button
-                        onClick={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
-                        className="p-2.5 bg-white border border-[#E0D8CC] rounded-md hover:border-[#8B7355] transition-all text-[#6B6B6B]"
-                    >
-                        {sortOrder === 'asc' ? <SortAsc size={16} /> : <SortDesc size={16} />}
-                    </button>
+                    <div className="flex gap-2">
+                        <div className="relative">
+                            <select
+                                value={sortBy}
+                                onChange={(e) => setSortBy(e.target.value as 'name' | 'size' | 'modified')}
+                                className="appearance-none pl-4 pr-9 py-3 bg-white border border-[#E5E0D8] rounded-xl text-sm text-[#5A5A5A] focus:border-[#8B7355]/50 outline-none hover:border-[#Cebfab] transition-colors cursor-pointer shadow-sm min-w-[100px]"
+                            >
+                                <option value="name">Name</option>
+                                <option value="size">Size</option>
+                                <option value="modified">Date</option>
+                            </select>
+                            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#9B9B9B]">
+                                <ChevronLeft size={14} className="-rotate-90" />
+                            </div>
+                        </div>
+                        <button
+                            onClick={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
+                            className="p-3 bg-white border border-[#E5E0D8] rounded-xl hover:border-[#8B7355]/50 hover:text-[#8B7355] hover:shadow-sm transition-all text-[#6B6B6B]"
+                        >
+                            {sortOrder === 'asc' ? <SortAsc size={18} /> : <SortDesc size={18} />}
+                        </button>
+                    </div>
                 </div>
 
                 <input type="file" ref={fileInputRef} className="hidden" multiple onChange={(e) => e.target.files && handleUpload(e.target.files)} />
@@ -402,10 +429,10 @@ export default function Dashboard() {
             </AnimatePresence>
 
             {/* Main Content: File List */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
                 {loading ? (
                     Array.from({ length: 8 }).map((_, i) => (
-                        <div key={i} className="bg-white border border-[#E0D8CC] rounded-lg p-6 h-32 animate-pulse" />
+                        <div key={i} className="bg-white/50 border border-white/60 rounded-2xl p-6 h-40 animate-pulse" />
                     ))
                 ) : (
                     <AnimatePresence mode="popLayout">
@@ -415,31 +442,46 @@ export default function Dashboard() {
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 0.95 }}
-                                transition={{ delay: index * 0.02 }}
+                                transition={{ delay: index * 0.03 }}
                                 layout
-                                className="group relative bg-white border border-[#E0D8CC] rounded-lg p-5 cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
+                                className="group relative bg-white/70 backdrop-blur-md border border-white/80 rounded-2xl p-6 cursor-pointer hover:bg-white hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.1)] hover:-translate-y-1 transition-all duration-300 ring-1 ring-transparent hover:ring-[#8B7355]/10"
                                 onClick={() => file.isDirectory ? setCurrentPath(currentPath ? `${currentPath}/${file.name}` : file.name) : null}
                             >
-                                <div className="flex justify-between items-start mb-4">
-                                    <div className="p-3 bg-[#F9F7F2] rounded-md group-hover:bg-[#F5F0E8] transition-colors border border-transparent group-hover:border-[#E0D8CC]">
+                                <div className="flex justify-between items-start mb-6">
+                                    <div className="p-4 bg-gradient-to-br from-[#F9F7F2] to-[#F1EDE6] rounded-xl group-hover:from-[#F5F0E8] group-hover:to-[#EAE4D9] transition-colors shadow-inner">
                                         {getFileIcon(file.name, file.isDirectory)}
                                     </div>
-                                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity translate-x-2 group-hover:translate-x-0 duration-300">
                                         {!file.isDirectory && (
-                                            <button onClick={(e) => { e.stopPropagation(); handleDownload(file.name); }} className="p-1.5 text-[#6B6B6B] hover:text-[#8B7355] hover:bg-[#F5F0E8] rounded transition-all" title="Download">
-                                                <Download size={16} />
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); handleDownload(file.name); }}
+                                                className="p-2 text-[#6B6B6B] hover:text-[#8B7355] hover:bg-[#F5F0E8] rounded-lg transition-all"
+                                                title="Download"
+                                            >
+                                                <Download size={18} />
                                             </button>
                                         )}
-                                        <button onClick={(e) => { e.stopPropagation(); handleDelete(file.name); }} className="p-1.5 text-[#6B6B6B] hover:text-red-500 hover:bg-red-50 rounded transition-all" title="Delete">
-                                            <Trash2 size={16} />
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); handleDelete(file.name); }}
+                                            className="p-2 text-[#6B6B6B] hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                                            title="Delete"
+                                        >
+                                            <Trash2 size={18} />
                                         </button>
                                     </div>
                                 </div>
 
                                 <div>
-                                    <h3 className="font-medium text-[#2C2C2C] truncate mb-1 text-sm group-hover:text-[#8B7355] transition-colors" title={file.name}>{file.name}</h3>
-                                    <div className="flex justify-between items-center text-xs text-[#9B9B9B] uppercase tracking-wide">
-                                        <span>{file.isDirectory ? 'Folder' : formatSize(file.size)}</span>
+                                    <h3
+                                        className="font-semibold text-[#2C2C2C] truncate mb-2 text-base group-hover:text-[#8B7355] transition-colors"
+                                        title={file.name}
+                                    >
+                                        {file.name}
+                                    </h3>
+                                    <div className="flex justify-between items-center text-xs font-medium text-[#9B9B9B] uppercase tracking-wide">
+                                        <span className="bg-[#F0EEE9] px-2 py-1 rounded text-[#7A7A7A]">
+                                            {file.isDirectory ? 'Folder' : formatSize(file.size)}
+                                        </span>
                                         <span>{formatDate(file.modified)}</span>
                                     </div>
                                 </div>

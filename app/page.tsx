@@ -14,11 +14,11 @@ export default function PortfolioPage() {
   const [showApiModal, setShowApiModal] = useState(false);
   const [heroImageFlipped, setHeroImageFlipped] = useState(false);
 
-  // Auto-rotate hero image every 4 seconds
+  // Auto-rotate hero image every 3 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       setHeroImageFlipped(prev => !prev);
-    }, 4000);
+    }, 3000);
     return () => clearInterval(interval);
   }, []);
   const [apiKey, setApiKey] = useState('');
@@ -199,7 +199,6 @@ export default function PortfolioPage() {
           <div className="hero-image-container">
             <div
               className={`hero-flip-card ${heroImageFlipped ? 'flipped' : ''}`}
-              onClick={() => setHeroImageFlipped(prev => !prev)}
             >
               {/* Front: SK Logo */}
               <div className="hero-flip-card-front">
@@ -379,13 +378,9 @@ export default function PortfolioPage() {
         <div className="project-featured project-featured-alt">
           <div className="project-content">
             <span className="project-label">Dunamu & Theori · 2024.09 - 2024.10</span>
-            <h3 className="project-title">DeFi Lending Protocol Audit</h3>
-            <p className="project-card-role">Team Member</p>
-            <p className="project-description">
-              Code Level Analysis of Compound Protocol&apos;s Deposit, Withdrawal, Loan, Repayment, and Liquidation Functions.
-              <br /><br />
-              Venus Protocol Isolated Pool, Cyan Audit and Invariant Check. Analyzed <b>352 findings</b> from various lending protocol audits.
-            </p>
+            <h3 className="project-title">{t.projects.defi_audit.title}</h3>
+            <p className="project-card-role">{t.projects.defi_audit.role}</p>
+            <p className="project-description" style={{ whiteSpace: 'pre-line' }}>{t.projects.defi_audit.desc}</p>
             <div className="project-tech">
               <span className="tech-tag" style={{ borderColor: 'var(--color-primary)', color: 'var(--color-primary)' }}>DeFi Audit</span>
               <span className="tech-tag">Compound Protocol</span>
@@ -493,7 +488,7 @@ export default function PortfolioPage() {
                   unoptimized
                 />
               </div>
-              <div className="project-sub-imgs">
+              <div className="project-sub-imgs project-sub-imgs-4">
                 {personaImages.map((img) => (
                   <div
                     key={img.src}

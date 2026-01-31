@@ -40,6 +40,11 @@ export const translations = {
                 role: 'Blockchain Developer / Team Leader',
                 desc: 'NFT platform promoting endangered birds awareness. Implemented smart contracts with Web3.js and managed NFT metadata on IPFS.'
             },
+            defi_audit: {
+                title: 'DeFi Lending Protocol Audit',
+                role: 'Team Member',
+                desc: 'Code Level Analysis of Compound Protocol\'s Deposit, Withdrawal, Loan, Repayment, and Liquidation Functions. Venus Protocol Isolated Pool, Cyan Audit and Invariant Check. Analyzed 352 findings from various lending protocol audits.'
+            },
             persona: {
                 title: 'Persona',
                 role: 'Frontend Lead / Team Leader',
@@ -134,6 +139,11 @@ export const translations = {
                 title: 'BirdChain',
                 role: '블록체인 개발자 / 팀장',
                 desc: '멸종 위기 조류 보호를 위한 NFT 플랫폼입니다. Web3.js로 스마트 컨트랙트를 연동하고 IPFS를 통해 NFT 메타데이터를 관리했습니다.'
+            },
+            defi_audit: {
+                title: 'DeFi 렌딩 프로토콜 감사',
+                role: '팀원',
+                desc: 'Compound Protocol의 입금, 출금, 대출, 상환, 청산 함수 코드 레벨 분석. Venus Protocol Isolated Pool, Cyan 감사 및 불변성(Invariant) 검증 수행. 다양한 렌딩 프로토콜 감사 리포트에서 352개의 취약점(Findings) 분석.'
             },
             persona: {
                 title: 'Persona',
